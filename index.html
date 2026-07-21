@@ -252,11 +252,18 @@
   }
 
   .card {
+    position: relative;
     background: var(--paper-raised);
     border: 1px solid var(--line);
     border-radius: 8px;
     box-shadow: var(--shadow);
     overflow: hidden;
+  }
+  .card-photo {
+    display: block;
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
   }
   .card-btn {
     width: 100%;
@@ -270,6 +277,25 @@
     display: block;
   }
   .card-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+  .fav-btn {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--paper-raised) 75%, transparent);
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 2;
+  }
+  .fav-btn svg { width: 15px; height: 15px; stroke: var(--ink-faint); fill: none; transition: fill 0.1s ease, stroke 0.1s ease; }
+  .fav-btn[aria-pressed="true"] svg { fill: var(--accent); stroke: var(--accent); }
+  .fav-btn:focus-visible { outline: 2px solid var(--focus); }
 
   .fam-pill {
     display: inline-flex;
@@ -342,6 +368,28 @@
     border-top: 1px solid var(--line);
     padding-top: 1rem;
   }
+
+  .panel-toolbar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .tool-btn {
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    background: color-mix(in srgb, var(--ink) 5%, transparent);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 0.4rem 0.7rem;
+    cursor: pointer;
+  }
+  .tool-btn svg { width: 14px; height: 14px; stroke: currentColor; flex-shrink: 0; }
+  .tool-btn:hover { color: var(--ink); }
 
   .intro {
     font-size: 0.88rem;
@@ -451,6 +499,81 @@
   }
   .empty .display { font-size: 1.3rem; color: var(--ink-soft); margin-bottom: 0.4rem; }
 
+  .fav-filter-btn {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    font-family: inherit;
+    color: var(--ink-faint);
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .fav-filter-btn svg { width: 17px; height: 17px; stroke: var(--ink-faint); fill: none; }
+  .fav-filter-btn[aria-pressed="true"] {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+  .fav-filter-btn[aria-pressed="true"] svg { fill: var(--accent); stroke: var(--accent); }
+  @media (prefers-color-scheme: dark) {
+    .fav-filter-btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); }
+    .fav-filter-btn[aria-pressed="true"] svg { fill: var(--accent-ink); stroke: var(--accent-ink); }
+  }
+  :root[data-theme="dark"] .fav-filter-btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); }
+  :root[data-theme="dark"] .fav-filter-btn[aria-pressed="true"] svg { fill: var(--accent-ink); stroke: var(--accent-ink); }
+
+  .cook-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: var(--paper);
+    overflow-y: auto;
+    padding-bottom: calc(3rem + env(safe-area-inset-bottom));
+  }
+  .cook-header {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    background: color-mix(in srgb, var(--paper) 94%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
+    padding: calc(1rem + env(safe-area-inset-top)) 1.25rem 1rem;
+  }
+  .cook-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-wrap: balance;
+  }
+  .cook-close {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--paper-raised);
+    color: var(--ink);
+    font-size: 1.1rem;
+    cursor: pointer;
+  }
+  .cook-body {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem;
+  }
+  .cook-body .section h4 { font-size: 0.85rem; }
+  .cook-body .ing-list li { font-size: 1.08rem; padding: 0.5rem 0; }
+  .cook-body ol.steps li { font-size: 1.12rem; line-height: 1.55; padding: 0.6rem 0; gap: 1rem; }
+  .cook-body ol.steps li::before { width: 2rem; height: 2rem; font-size: 0.9rem; }
+  .cook-body ul.notes li { font-size: 1rem; }
+  .cook-body .section + .section { margin-top: 1.75rem; }
+
   @media (prefers-reduced-motion: reduce) {
     .panel, .chevron { transition: none; }
   }
@@ -460,6 +583,11 @@
   window.addEventListener("pageshow", (event) => {
     if (event.persisted) window.location.reload();
   });
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    });
+  }
 </script>
 
 <div class="wrap">
@@ -473,6 +601,9 @@
           <button id="clear-search" aria-label="Effacer la recherche">✕</button>
         </div>
         <select id="family-select" class="family-select" aria-label="Filtrer par famille"></select>
+        <button id="fav-filter" class="fav-filter-btn" type="button" aria-pressed="false" aria-label="Afficher uniquement mes favoris">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        </button>
       </div>
     </div>
   </header>
@@ -482,7 +613,7 @@
     <div class="grid" id="grid"></div>
     <div class="empty" id="empty" hidden>
       <p class="display">Rien à cette adresse.</p>
-      <p>Essayez un autre mot, ou réinitialisez le filtre de famille.</p>
+      <p>Essayez un autre mot, ou réinitialisez les filtres.</p>
     </div>
   </main>
 </div>
@@ -696,7 +827,7 @@
           heading: "Protocole 8 h — Ingrédients (pour 3 à 4 pizzas)",
           ingredients: [
             ["Farine de type 00 (T46 convient aussi)", "1000 g"],
-            ["Eau", "640 g", "L'original indique « 6430 g » — presque certainement une coquille pour 640 g (≈ 64 % d'hydratation). À vérifier avant de vous lancer."],
+            ["Eau", "640 g"],
             ["Levure fraîche (ou 1 g de levure sèche)", "3 g"],
             ["Sel", "25 g"],
           ],
@@ -1213,7 +1344,7 @@
             ["Chair à saucisse", "500 g"],
             ["Blancs de poulet", "500 g"],
             ["Lard fumé", "100 g"],
-            ["Foie de volaille", "100 g", "Le texte original indique « les raisins légèrement » à cet endroit — presque certainement une coquille de dictée pour « assaisonner légèrement » (sel, poivre)."],
+            ["Foie de volaille", "100 g", "Assaisonner légèrement (sel, poivre)"],
             ["Lard à barder", "1 paquet"],
             ["Œuf", "1 par kg de farce"],
             ["Thym, laurier, échalote", "au goût"],
@@ -1285,6 +1416,28 @@
     return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
   }
 
+  function tokenize(s) {
+    return Array.from(new Set(s.match(/[a-z0-9]+/g) || []));
+  }
+
+  function levenshtein(a, b) {
+    const m = a.length, n = b.length;
+    if (!m) return n;
+    if (!n) return m;
+    const dp = new Array(n + 1);
+    for (let j = 0; j <= n; j++) dp[j] = j;
+    for (let i = 1; i <= m; i++) {
+      let prev = dp[0];
+      dp[0] = i;
+      for (let j = 1; j <= n; j++) {
+        const tmp = dp[j];
+        dp[j] = a[i - 1] === b[j - 1] ? prev : 1 + Math.min(prev, dp[j], dp[j - 1]);
+        prev = tmp;
+      }
+    }
+    return dp[n];
+  }
+
   function searchText(r) {
     const parts = [r.title, r.subtitle, r.intro || "", ...(r.tags || [])];
     for (const s of r.sections) {
@@ -1295,9 +1448,23 @@
     }
     return normalize(parts.join(" "));
   }
-  RECIPES.forEach(r => r._search = searchText(r));
+  RECIPES.forEach(r => {
+    r._search = searchText(r);
+    r._tokens = tokenize(r._search);
+  });
+
+  const FAV_KEY = "recettes-favoris";
+  function loadFavorites() {
+    try { return new Set(JSON.parse(localStorage.getItem(FAV_KEY) || "[]")); }
+    catch { return new Set(); }
+  }
+  function saveFavorites() {
+    try { localStorage.setItem(FAV_KEY, JSON.stringify([...FAVORITES])); } catch {}
+  }
+  let FAVORITES = loadFavorites();
 
   const familySelectEl = document.getElementById("family-select");
+  const favFilterEl = document.getElementById("fav-filter");
   const gridEl = document.getElementById("grid");
   const emptyEl = document.getElementById("empty");
   const resultLine = document.getElementById("result-line");
@@ -1306,6 +1473,7 @@
 
   let activeFamily = "all";
   let query = "";
+  let onlyFavorites = false;
 
   function familyCount(key) {
     return key === "all" ? RECIPES.length : RECIPES.filter(r => r.family === key).length;
@@ -1333,10 +1501,74 @@
     return html;
   }
 
+  function recipeText(r) {
+    const lines = [r.title, r.subtitle, ""];
+    if (r.intro) lines.push(r.intro, "");
+    for (const s of r.sections) {
+      if (s.heading) lines.push(s.heading.toUpperCase());
+      (s.ingredients || []).forEach(([name, qty]) => lines.push(`- ${name} : ${qty}`));
+      (s.steps || []).forEach((t, i) => lines.push(`${i + 1}. ${t}`));
+      (s.notes || []).forEach(t => lines.push(`- ${t}`));
+      lines.push("");
+    }
+    return lines.join("\n").trim();
+  }
+
+  function shareRecipe(r, btn) {
+    const url = location.origin + location.pathname + "#" + r.id;
+    const text = recipeText(r);
+    if (navigator.share) {
+      navigator.share({ title: r.title, text, url }).catch(() => {});
+      return;
+    }
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text + "\n" + url).then(() => {
+        const original = btn.innerHTML;
+        btn.textContent = "Copié dans le presse-papiers";
+        setTimeout(() => { btn.innerHTML = original; }, 1600);
+      }).catch(() => {});
+    }
+  }
+
+  function openCookMode(r) {
+    const fam = FAMILIES[r.family];
+    const overlay = document.createElement("div");
+    overlay.className = "cook-overlay";
+    overlay.innerHTML = `
+      <div class="cook-header">
+        <h2 class="display">${r.title}</h2>
+        <button class="cook-close" type="button" aria-label="Fermer le mode cuisine">✕</button>
+      </div>
+      <div class="cook-body">
+        ${r.intro ? `<p class="intro">${r.intro}</p>` : ""}
+        ${r.sections.map(s => renderSection(s, fam)).join("")}
+      </div>`;
+    document.body.appendChild(overlay);
+    document.body.style.overflow = "hidden";
+    let wakeLock = null;
+    if ("wakeLock" in navigator) {
+      navigator.wakeLock.request("screen").then(wl => { wakeLock = wl; }).catch(() => {});
+    }
+    function close() {
+      if (wakeLock) wakeLock.release().catch(() => {});
+      document.body.style.overflow = "";
+      overlay.remove();
+      document.removeEventListener("keydown", onKey);
+    }
+    function onKey(e) { if (e.key === "Escape") close(); }
+    document.addEventListener("keydown", onKey);
+    overlay.querySelector(".cook-close").addEventListener("click", close);
+  }
+
   function cardHTML(r) {
     const fam = FAMILIES[r.family];
+    const isFav = FAVORITES.has(r.id);
     return `
       <article class="card" data-id="${r.id}" data-open="false">
+        ${r.photo ? `<img class="card-photo" src="${r.photo}" alt="">` : ""}
+        <button class="fav-btn" type="button" data-fav="${r.id}" aria-pressed="${isFav}" aria-label="${isFav ? "Retirer des favoris" : "Ajouter aux favoris"}">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        </button>
         <button class="card-btn" aria-expanded="false">
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
           <span class="fam-pill" style="--famcolor:${fam.color};--fambg:${fam.bg}">${fam.label}</span>
@@ -1350,6 +1582,16 @@
         </button>
         <div class="panel">
           <div class="panel-inner">
+            <div class="panel-toolbar">
+              <button class="tool-btn cook-btn" type="button" data-cook="${r.id}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg>
+                Mode cuisine
+              </button>
+              <button class="tool-btn share-btn" type="button" data-share="${r.id}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="M7.5 7.5 12 3l4.5 4.5"></path><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg>
+                Partager
+              </button>
+            </div>
             ${r.intro ? `<p class="intro">${r.intro}</p>` : ""}
             ${r.sections.map(s => renderSection(s, fam)).join("")}
           </div>
@@ -1357,10 +1599,36 @@
       </article>`;
   }
 
+  function wordMatches(r, word) {
+    if (r._search.includes(word)) return true;
+    if (word.length < 4) return false;
+    const threshold = word.length <= 5 ? 1 : 2;
+    for (const tok of r._tokens) {
+      if (Math.abs(tok.length - word.length) > threshold) continue;
+      if (levenshtein(word, tok) <= threshold) return true;
+    }
+    return false;
+  }
+
   function matches(r) {
     const famOk = activeFamily === "all" || r.family === activeFamily;
-    const qOk = query === "" || r._search.includes(query);
-    return famOk && qOk;
+    const favOk = !onlyFavorites || FAVORITES.has(r.id);
+    let qOk = true;
+    if (query !== "") {
+      const words = query.split(/\s+/).filter(Boolean);
+      qOk = words.every(w => wordMatches(r, w));
+    }
+    return famOk && favOk && qOk;
+  }
+
+  function openDeepLink() {
+    const id = location.hash.replace("#", "");
+    if (!id) return;
+    const card = gridEl.querySelector(`.card[data-id="${id}"]`);
+    if (!card) return;
+    card.setAttribute("data-open", "true");
+    card.querySelector(".card-btn").setAttribute("aria-expanded", "true");
+    card.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function render() {
@@ -1378,6 +1646,26 @@
         const open = card.getAttribute("data-open") === "true";
         card.setAttribute("data-open", String(!open));
         btn.setAttribute("aria-expanded", String(!open));
+      });
+    });
+    gridEl.querySelectorAll(".fav-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.fav;
+        if (FAVORITES.has(id)) FAVORITES.delete(id); else FAVORITES.add(id);
+        saveFavorites();
+        render();
+      });
+    });
+    gridEl.querySelectorAll(".cook-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const r = RECIPES.find(x => x.id === btn.dataset.cook);
+        if (r) openCookMode(r);
+      });
+    });
+    gridEl.querySelectorAll(".share-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const r = RECIPES.find(x => x.id === btn.dataset.share);
+        if (r) shareRecipe(r, btn);
       });
     });
   }
@@ -1398,7 +1686,13 @@
     activeFamily = familySelectEl.value;
     render();
   });
+  favFilterEl.addEventListener("click", () => {
+    onlyFavorites = !onlyFavorites;
+    favFilterEl.setAttribute("aria-pressed", String(onlyFavorites));
+    render();
+  });
 
   buildFamilySelect();
   render();
+  openDeepLink();
 </script>
