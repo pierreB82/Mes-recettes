@@ -25,6 +25,10 @@
     --fam-entree-bg: #ecd6d2;
     --fam-plat: #2c5f52;
     --fam-plat-bg: #d9e6de;
+    --fam-pain: #8a5a1f;
+    --fam-pain-bg: #ecdfc0;
+    --fam-sauce: #55692a;
+    --fam-sauce-bg: #dbe3c0;
     --focus: #b5401c;
     --shadow: 0 1px 2px rgba(42,35,24,0.06), 0 6px 16px rgba(42,35,24,0.05);
   }
@@ -45,6 +49,10 @@
       --fam-entree-bg: #3a2320;
       --fam-plat: #7fbca8;
       --fam-plat-bg: #1e332c;
+      --fam-pain: #e3b56b;
+      --fam-pain-bg: #3a2c14;
+      --fam-sauce: #a8c46a;
+      --fam-sauce-bg: #2b3318;
       --focus: #e2703f;
       --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.35);
     }
@@ -64,6 +72,10 @@
     --fam-entree-bg: #3a2320;
     --fam-plat: #7fbca8;
     --fam-plat-bg: #1e332c;
+    --fam-pain: #e3b56b;
+    --fam-pain-bg: #3a2c14;
+    --fam-sauce: #a8c46a;
+    --fam-sauce-bg: #2b3318;
     --focus: #e2703f;
     --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.35);
   }
@@ -82,6 +94,10 @@
     --fam-entree-bg: #ecd6d2;
     --fam-plat: #2c5f52;
     --fam-plat-bg: #d9e6de;
+    --fam-pain: #8a5a1f;
+    --fam-pain-bg: #ecdfc0;
+    --fam-sauce: #55692a;
+    --fam-sauce-bg: #dbe3c0;
     --focus: #b5401c;
     --shadow: 0 1px 2px rgba(42,35,24,0.06), 0 6px 16px rgba(42,35,24,0.05);
   }
@@ -477,6 +493,8 @@
     aperitif: { label: "Apéritifs & Amuse-bouches", color: "var(--fam-aperitif)", bg: "var(--fam-aperitif-bg)" },
     entree:   { label: "Entrées & Charcuterie maison", color: "var(--fam-entree)", bg: "var(--fam-entree-bg)" },
     plat:     { label: "Plats principaux", color: "var(--fam-plat)", bg: "var(--fam-plat-bg)" },
+    pain:     { label: "Pains & Boulangerie", color: "var(--fam-pain)", bg: "var(--fam-pain-bg)" },
+    sauce:    { label: "Sauces & Condiments", color: "var(--fam-sauce)", bg: "var(--fam-sauce-bg)" },
   };
 
   const RECIPES = [
@@ -670,9 +688,9 @@
       id: "pizza",
       title: "Pâte à pizza napolitaine",
       family: "plat",
-      subtitle: "Deux protocoles — 8 h ou 24 h — pour 3 à 4 pizzas",
+      subtitle: "Trois protocoles — 8 h classique, 8 h Famag/Cozze ou 24 h",
       time: "8 h ou 24 h selon le protocole",
-      tags: ["pizza", "napolitaine", "farine 00", "levure"],
+      tags: ["pizza", "napolitaine", "farine 00", "levure", "Famag", "Cozze"],
       sections: [
         {
           heading: "Protocole 8 h — Ingrédients (pour 3 à 4 pizzas)",
@@ -719,6 +737,355 @@
             "Apprêt : garder à température ambiante (20–24 °C) jusqu'à la cuisson — de 5 à 7 h, selon la fermeté du boulage.",
             "Étalage et garnissage : étaler dans la semoule pour éviter les zones humides, en poussant l'air vers les bords pour une pâte fine au centre. Garnir au choix.",
             "Cuisson : température idéale 450 °C, pendant 80 à 110 secondes (four à bois, gaz ou électrique). Adapter la puissance et le temps pour un four domestique.",
+          ],
+        },
+        {
+          heading: "Protocole Famag / Cozze 13 — V0, 8 h — Ingrédients (3 pizzas de 260 g)",
+          ingredients: [
+            ["Farine Mon Fournil T00", "465 g"],
+            ["Eau froide (65 %)", "303 g"],
+            ["Sel", "12,5 g"],
+            ["Levure fraîche", "2,5 g"],
+          ],
+        },
+        {
+          heading: "Protocole Famag / Cozze 13 — Pétrissage et pointage",
+          steps: [
+            "Mélanger 248 g d'eau froide et la levure, 15 secondes.",
+            "Ajouter les 465 g de farine.",
+            "Pétrir en vitesse 1 : 5 min.",
+            "Ajouter le sel, continuer 1 min.",
+            "Passer en vitesse 2 et ajouter progressivement les 55 g d'eau restants sur 2 min.",
+            "Continuer 5 à 6 min. Arrêter dès que la pâte est lisse, souple et à 23–24 °C. En été, utiliser une eau très froide et, si besoin, mettre aussi la farine au réfrigérateur.",
+            "Repos couvert : 10 min.",
+            "Pointage en masse : 1 h à 1 h 15 à 26–27 °C.",
+            "Diviser en 3 pâtons de 260 g.",
+            "Bouler sans dégazer, avec le minimum de tension. Si la pâte se rétracte, ne pas forcer : laisser reposer 5 min puis reprendre ; si ça se reproduit, serrer moins les pâtons et réduire légèrement le temps en vitesse 2.",
+            "Fermentation en boîtes jusqu'à l'heure de cuisson visée. Les pâtons sont prêts quand ils sont bien gonflés, souples, et gardent une légère empreinte au doigt.",
+          ],
+        },
+        {
+          heading: "Protocole Famag / Cozze 13 — Cuisson",
+          steps: [
+            "Préchauffer le four à pizza Cozze 30 min, pierre à 430–450 °C.",
+            "Première rotation après 20 à 25 secondes, puis 1 à 2 petites rotations.",
+            "Cuisson totale : 75 à 90 secondes.",
+          ],
+        },
+        {
+          heading: "Congélation des pâtons",
+          notes: [
+            "Congeler juste après le boulage, après 20 à 30 min à température ambiante.",
+            "Décongélation : une nuit au réfrigérateur puis 4 heures à température ambiante.",
+          ],
+        },
+      ],
+    },
+    {
+      id: "naan",
+      title: "Naan ultra-moelleux — deux versions",
+      family: "pain",
+      subtitle: "Yaourt grec ou yaourt nature — 8 grands naans (23 cm)",
+      time: "Environ 2 h (pousse, façonnage, cuisson)",
+      tags: ["naan", "yaourt", "pain plat", "pétrin Famag"],
+      sections: [
+        {
+          heading: "Version yaourt grec — Ingrédients",
+          ingredients: [
+            ["Farine T65", "450 g"],
+            ["Eau tiède", "180 g"],
+            ["Yaourt grec", "150 g"],
+            ["Levure sèche", "12 g"],
+            ["Sucre", "18 g"],
+            ["Sel", "9 g"],
+            ["Huile", "30 g"],
+          ],
+        },
+        {
+          heading: "Version yaourt grec — Étapes (pétrin Famag)",
+          steps: [
+            "Eau tiède + levure + sucre : mélanger 5 min.",
+            "Ajouter farine + sel : 2 min en vitesse 1.",
+            "Ajouter yaourt grec + huile : 3 min en vitesse 1, puis 7 à 8 min en vitesse 2.",
+            "Pointage 1 h 30 à température ambiante.",
+            "Diviser en 8 boules de 100 à 105 g, repos 15 min.",
+            "Étaler finement à 23 cm (2 à 3 mm).",
+            "Cuire en poêle en fonte très chaude : 1 min puis 40 à 60 secondes.",
+            "Badigeonner de beurre fondu à la fin.",
+          ],
+        },
+        {
+          heading: "Version yaourt nature, plus liquide — Ingrédients",
+          ingredients: [
+            ["Farine T65", "500 g"],
+            ["Eau tiède", "180 g"],
+            ["Yaourt nature", "150 g"],
+            ["Levure sèche", "12 g"],
+            ["Sucre", "18 g"],
+            ["Sel", "9 g"],
+            ["Huile", "30 g"],
+          ],
+        },
+        {
+          heading: "Version yaourt nature — Étapes (pétrin Famag)",
+          steps: [
+            "Eau tiède + levure + sucre : mélanger 5 min.",
+            "Ajouter farine + sel : 2 min en vitesse 1.",
+            "Ajouter yaourt nature + huile : 3 min en vitesse 1, puis 7 à 8 min en vitesse 2.",
+            "Pointage 1 h 30.",
+            "Diviser en 8 boules de 105 à 110 g, repos 15 min.",
+            "Étaler finement à 23 cm.",
+            "Cuire en poêle en fonte très chaude.",
+            "Badigeonner de beurre fondu.",
+          ],
+        },
+      ],
+    },
+    {
+      id: "nuoc-mam",
+      title: "Sauce asiatique longue conservation (type nuoc-mâm)",
+      family: "sauce",
+      subtitle: "Version moins sucrée et stable — pour 1 litre",
+      time: "15 min de préparation",
+      tags: ["nuoc mam", "sauce poisson", "vinaigre de riz", "condiment"],
+      sections: [
+        {
+          heading: "Ingrédients (pour 1 litre)",
+          ingredients: [
+            ["Eau bouillie puis refroidie", "350 ml"],
+            ["Sauce poisson", "180 ml"],
+            ["Vinaigre de riz", "250 ml"],
+            ["Sucre blanc", "180 g"],
+            ["Ail granulé", "2 c. à café"],
+            ["Piment sec (flakes ou écrasé)", "2 à 3 c. à café"],
+          ],
+        },
+        {
+          heading: "Protocole",
+          steps: [
+            "Faire bouillir l'eau pendant 1 minute pour la stériliser.",
+            "Verser l'eau chaude dans un récipient et ajouter le sucre. Mélanger jusqu'à dissolution complète.",
+            "Ajouter la sauce poisson et le vinaigre de riz.",
+            "Incorporer l'ail granulé et le piment sec.",
+            "Ébouillanter une bouteille en verre pour la stériliser.",
+            "Verser la sauce dans la bouteille encore chaude.",
+            "Laisser refroidir puis conserver au réfrigérateur.",
+          ],
+        },
+      ],
+    },
+    {
+      id: "pain-campagne",
+      title: "Pain de campagne — version optimisée",
+      family: "pain",
+      subtitle: "Cuisson en cocotte, pétrin Famag Grilletta IM5",
+      time: "Environ 4 h, du pétrissage à la cuisson",
+      tags: ["pain", "campagne", "cocotte", "seigle"],
+      sections: [
+        {
+          heading: "Équipement",
+          notes: [
+            "Four De Dietrich DOP8360A, mode chaleur tournante / air pulsé.",
+            "Cocotte en fonte avec couvercle.",
+            "Pétrin à spirale Famag Grilletta IM5 (10 vitesses).",
+          ],
+        },
+        {
+          heading: "Ingrédients",
+          ingredients: [
+            ["Farine T65", "500 g"],
+            ["Eau (72–75 % d'hydratation)", "360 à 375 g"],
+            ["Sel", "10 g"],
+            ["Levure sèche (ou 9 g fraîche)", "3 g"],
+            ["Seigle en option (remplace autant de T65)", "10 à 15 %"],
+          ],
+        },
+        {
+          heading: "Pétrissage (Famag IM5)",
+          steps: [
+            "Vitesse 1 (position 1/10) : 4 à 5 minutes.",
+            "Vitesse 2 (position 2/10) : 5 à 6 minutes. Objectif : température de pâte 23–24 °C.",
+          ],
+        },
+        {
+          heading: "Première fermentation",
+          steps: [
+            "1 h 30 à 2 h à température ambiante.",
+            "1 rabat à 30 minutes (optionnel à cette hydratation).",
+          ],
+        },
+        {
+          heading: "Façonnage et apprêt",
+          steps: [
+            "Former une boule serrée.",
+            "Apprêt 45 à 60 min dans un torchon fariné, couture vers le haut.",
+          ],
+        },
+        {
+          heading: "Cuisson (four DOP8360A)",
+          steps: [
+            "Mode chaleur tournante / air pulsé, ventilateur seul.",
+            "Préchauffer le four et la cocotte (vide, couvercle inclus) à 250 °C pendant 25 à 30 min.",
+            "Déposer la pâte dans la cocotte, couture en bas. Grigner.",
+            "Cuire 20 min à 250 °C couvercle fermé, puis 20 à 25 min à 230 °C couvercle ouvert.",
+            "Option : 210 °C pendant 5 à 10 min, porte entrouverte, pour sécher la croûte.",
+          ],
+        },
+        {
+          heading: "Résultat attendu",
+          notes: [
+            "Mie aérée, croûte épaisse, développement optimal grâce à la cocotte et au pétrin à spirale.",
+          ],
+        },
+      ],
+    },
+    {
+      id: "pain-de-mie",
+      title: "Pain de mie — comparatif de 4 versions",
+      family: "pain",
+      subtitle: "Référence T65/T110, et 3 shokupans (tangzhong eau, tangzhong lait, yudane)",
+      time: "3 à 4 h avec les pousses, selon la version",
+      tags: ["pain de mie", "shokupan", "tangzhong", "yudane", "moule"],
+      sections: [
+        {
+          heading: "Version référence T65 + T110 — Ingrédients",
+          ingredients: [
+            ["Farine T65", "790 g"],
+            ["Farine T110", "330 g"],
+            ["Eau", "360 g"],
+            ["Lait", "320 g"],
+            ["Beurre mou", "90 g"],
+            ["Miel ou sucre", "40 g"],
+            ["Sel", "17 g"],
+            ["Levure fraîche", "45 g"],
+          ],
+        },
+        {
+          heading: "Version référence — Étapes",
+          steps: [
+            "Autolyse optionnelle : farines + eau + lait, 20 à 30 min.",
+            "Mélange initial : ajouter levure + sucre, 3 min en vitesse 1.",
+            "Incorporer le sel puis le beurre mou en petites portions, 1 à 2 min (vitesse 1 puis 2).",
+            "Développement du gluten : 12 min en vitesse 2, jusqu'à une pâte lisse et élastique.",
+            "Première pousse : 1 h, ou jusqu'à doubler de volume.",
+            "Façonnage en boudin ou en 3 à 4 cylindres.",
+            "Deuxième pousse : 50 à 70 min, ou jusqu'à 1,5 cm du couvercle si moule fermé.",
+            "Cuisson : 25 à 30 min couvercle fermé à 180 °C, puis 8 à 10 min sans couvercle à 185–190 °C.",
+            "Refroidir complètement sur grille.",
+          ],
+        },
+        {
+          heading: "Shokupan V1 (tangzhong eau + farine) — Tangzhong",
+          ingredients: [
+            ["Farine T65", "55 g"],
+            ["Eau", "275 g"],
+          ],
+        },
+        {
+          heading: "Shokupan V1 — Pâte principale",
+          ingredients: [
+            ["Farine T65", "1100 g"],
+            ["Tangzhong", "tout"],
+            ["Eau", "260 g"],
+            ["Lait", "280 g"],
+            ["Beurre", "110 g"],
+            ["Sucre", "30 g"],
+            ["Sel", "18 g"],
+            ["Levure fraîche", "40 g"],
+          ],
+        },
+        {
+          heading: "Shokupan V1 — Étapes",
+          steps: [
+            "Tangzhong : chauffer l'eau et la farine à 65–70 °C, laisser reposer 10 à 15 min.",
+            "Mélanger farines + liquides + levure + sucre, 5 min.",
+            "Ajouter le sel et le beurre, pétrir 10 à 12 min.",
+            "Première pousse : 1 h.",
+            "Façonnage shokupan (3 à 4 cylindres).",
+            "Deuxième pousse : 45 à 70 min.",
+            "Cuisson : 30 min couvercle fermé à 180 °C, puis 8 min sans couvercle à 190 °C.",
+          ],
+        },
+        {
+          heading: "Shokupan V2 (tangzhong lait + farine) — Tangzhong",
+          ingredients: [
+            ["Farine T65", "55 g"],
+            ["Lait", "275 g"],
+          ],
+        },
+        {
+          heading: "Shokupan V2 — Pâte principale",
+          ingredients: [
+            ["Farine T65", "1100 g"],
+            ["Tangzhong", "tout"],
+            ["Eau", "245 g"],
+            ["Lait", "260 g"],
+            ["Beurre", "120 g"],
+            ["Sucre", "30 g"],
+            ["Sel", "18 g"],
+            ["Levure fraîche", "40 g"],
+          ],
+        },
+        {
+          heading: "Shokupan V2 — Étapes",
+          steps: [
+            "Tangzhong : chauffer le lait et la farine jusqu'à épaississement, laisser reposer 10 à 15 min.",
+            "Mélanger farines + liquides + tangzhong + sucre + levure.",
+            "Ajouter le sel et le beurre, pétrir 10 à 12 min.",
+            "Première pousse : 1 h.",
+            "Façonnage shokupan.",
+            "Deuxième pousse : 45 à 70 min.",
+            "Cuisson : 30 min couvercle fermé, puis 8 min sans couvercle.",
+          ],
+        },
+        {
+          heading: "Shokupan V3 (méthode yudane) — Yudane",
+          ingredients: [
+            ["Farine T65", "110 g"],
+            ["Eau bouillante", "110 g"],
+          ],
+        },
+        {
+          heading: "Shokupan V3 — Pâte principale",
+          ingredients: [
+            ["Farine T65", "990 g"],
+            ["Yudane", "tout"],
+            ["Eau", "260 g"],
+            ["Lait", "280 g"],
+            ["Beurre", "110 g"],
+            ["Sucre", "30 g"],
+            ["Sel", "18 g"],
+            ["Levure fraîche", "40 g"],
+          ],
+        },
+        {
+          heading: "Shokupan V3 — Étapes",
+          steps: [
+            "Préparer le yudane : verser l'eau bouillante sur la farine, mélanger, couvrir, laisser reposer au moins 4 h (ou une nuit au frigo).",
+            "Mélange initial : liquides + sucre + levure + farine + tout le yudane, pétrir 3 à 4 min en vitesse 1 juste pour amalgamer.",
+            "Incorporer le beurre mou en petites portions, 1 à 2 min, en passant en vitesse 2 dès qu'il disparaît.",
+            "Développement du gluten : 8 à 10 min en vitesse 2, jusqu'à une pâte lisse, brillante, avec voile (windowpane).",
+            "Première pousse : environ 1 h, jusqu'à +70–100 % de volume.",
+            "Façonnage : diviser en 3 à 4 pâtons, détente 10 min, former les cylindres et les placer dans le moule.",
+            "Deuxième pousse : jusqu'à 1,5 cm du couvercle (fermer un couvercle amovible juste avant cuisson).",
+            "Cuisson : 30 min couvercle fermé à 180 °C, puis 8 min sans couvercle à 185–190 °C.",
+          ],
+        },
+        {
+          heading: "Vitesses de pétrissage — pour les 3 shokupans",
+          notes: [
+            "Mélange initial : vitesse 1, 3 à 5 min.",
+            "Développement du gluten : vitesse 2, 7 à 10 min.",
+            "Incorporation du beurre : vitesse 2, 8 à 12 min.",
+            "Pour un yudane : ajouter 1 à 2 min sur la phase 2.",
+          ],
+        },
+        {
+          heading: "Résultats attendus",
+          notes: [
+            "V1 (tangzhong eau) : mie blanche, très moelleuse, douce, tenue parfaite.",
+            "V2 (tangzhong lait) : mie ultra-moelleuse, plus dorée, goût doux sans œuf.",
+            "V3 (yudane) : mie filante, très élastique, style japonais traditionnel.",
           ],
         },
       ],
