@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Mes Recettes — Carnet de cuisine</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -577,6 +578,100 @@
   @media (prefers-reduced-motion: reduce) {
     .panel, .chevron { transition: none; }
   }
+
+  .note-input {
+    width: 100%;
+    min-height: 4.5rem;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 0.88rem;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 0.6rem 0.7rem;
+  }
+  .note-input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+  .note-input::placeholder { color: var(--ink-faint); }
+
+  .shopping-btn { position: relative; }
+  .shopping-count[hidden] { display: none; }
+  .shopping-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 0.62rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  .shop-add-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .shop-add-input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.6rem 0.8rem;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    background: var(--paper-raised);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.95rem;
+  }
+  .shop-add-input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+  .shop-list { margin: 0; padding: 0; list-style: none; }
+  .shop-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .shop-item-label {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+  }
+  .shop-item-label input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--accent); }
+  .shop-item-text { display: flex; flex-direction: column; min-width: 0; }
+  .shop-item-name { font-size: 0.98rem; }
+  .shop-item-qty { font-size: 0.8rem; color: var(--ink-soft); }
+  .shop-item-source { font-size: 0.72rem; color: var(--ink-faint); font-style: italic; }
+  .shop-item.checked .shop-item-name,
+  .shop-item.checked .shop-item-qty { text-decoration: line-through; color: var(--ink-faint); }
+  .shop-item-remove {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0.3rem;
+  }
+  .shop-item-remove:hover { color: var(--accent); }
+
+  .shop-actions {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+  }
 </style>
 
 <script>
@@ -603,6 +698,10 @@
         <select id="family-select" class="family-select" aria-label="Filtrer par famille"></select>
         <button id="fav-filter" class="fav-filter-btn" type="button" aria-pressed="false" aria-label="Afficher uniquement mes favoris">
           <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        </button>
+        <button id="shopping-btn" class="fav-filter-btn shopping-btn" type="button" aria-label="Liste de courses">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          <span id="shopping-count" class="shopping-count" hidden>0</span>
         </button>
       </div>
     </div>
@@ -1463,6 +1562,156 @@
   }
   let FAVORITES = loadFavorites();
 
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  const NOTE_KEY = "recettes-notes";
+  function loadNotes() {
+    try { return JSON.parse(localStorage.getItem(NOTE_KEY) || "{}"); }
+    catch { return {}; }
+  }
+  function saveNotes() {
+    try { localStorage.setItem(NOTE_KEY, JSON.stringify(NOTES)); } catch {}
+  }
+  let NOTES = loadNotes();
+
+  const SHOP_KEY = "recettes-shopping";
+  function loadShopping() {
+    try { return JSON.parse(localStorage.getItem(SHOP_KEY) || "[]"); }
+    catch { return []; }
+  }
+  function saveShopping() {
+    try { localStorage.setItem(SHOP_KEY, JSON.stringify(SHOPPING)); } catch {}
+  }
+  let SHOPPING = loadShopping();
+
+  function shopItemId() {
+    return Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+
+  function shoppingCount() {
+    return SHOPPING.filter(i => !i.checked).length;
+  }
+
+  function updateShoppingBadge() {
+    const el = document.getElementById("shopping-count");
+    const n = shoppingCount();
+    el.textContent = String(n);
+    el.hidden = n === 0;
+  }
+
+  function addRecipeToShopping(r) {
+    const existingKeys = new Set(SHOPPING.map(i => i.name + "␟" + i.qty));
+    let added = 0;
+    for (const s of r.sections) {
+      (s.ingredients || []).forEach(([name, qty]) => {
+        const key = name + "␟" + qty;
+        if (existingKeys.has(key)) return;
+        existingKeys.add(key);
+        SHOPPING.push({ id: shopItemId(), name, qty, checked: false, recipeTitle: r.title });
+        added++;
+      });
+    }
+    saveShopping();
+    return added;
+  }
+
+  function shoppingItemHTML(item) {
+    return `
+      <li class="shop-item${item.checked ? " checked" : ""}" data-shop-id="${item.id}">
+        <label class="shop-item-label">
+          <input type="checkbox" data-shop-check="${item.id}" ${item.checked ? "checked" : ""}>
+          <span class="shop-item-text">
+            <span class="shop-item-name">${escapeHtml(item.name)}</span>
+            ${item.qty ? `<span class="shop-item-qty">${escapeHtml(item.qty)}</span>` : ""}
+            ${item.recipeTitle ? `<span class="shop-item-source">${escapeHtml(item.recipeTitle)}</span>` : ""}
+          </span>
+        </label>
+        <button class="shop-item-remove" type="button" data-shop-remove="${item.id}" aria-label="Supprimer">✕</button>
+      </li>`;
+  }
+
+  function renderShoppingList(overlay) {
+    const listEl = overlay.querySelector(".shop-list");
+    const emptyEl = overlay.querySelector(".shop-empty");
+    if (SHOPPING.length === 0) {
+      listEl.innerHTML = "";
+      emptyEl.hidden = false;
+    } else {
+      emptyEl.hidden = true;
+      listEl.innerHTML = SHOPPING.map(shoppingItemHTML).join("");
+    }
+    updateShoppingBadge();
+    listEl.querySelectorAll("[data-shop-check]").forEach(cb => {
+      cb.addEventListener("change", () => {
+        const item = SHOPPING.find(i => i.id === cb.dataset.shopCheck);
+        if (item) { item.checked = cb.checked; saveShopping(); renderShoppingList(overlay); }
+      });
+    });
+    listEl.querySelectorAll("[data-shop-remove]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        SHOPPING = SHOPPING.filter(i => i.id !== btn.dataset.shopRemove);
+        saveShopping();
+        renderShoppingList(overlay);
+      });
+    });
+  }
+
+  function openShoppingList() {
+    const overlay = document.createElement("div");
+    overlay.className = "cook-overlay shop-overlay";
+    overlay.innerHTML = `
+      <div class="cook-header">
+        <h2 class="display">Liste de courses</h2>
+        <button class="cook-close" type="button" aria-label="Fermer la liste de courses">✕</button>
+      </div>
+      <div class="cook-body">
+        <form class="shop-add-row">
+          <input type="text" class="shop-add-input" placeholder="Ajouter un article…" autocomplete="off">
+          <button type="submit" class="tool-btn">Ajouter</button>
+        </form>
+        <ul class="shop-list"></ul>
+        <p class="empty shop-empty" hidden><span class="display">Liste vide.</span></p>
+        <div class="shop-actions">
+          <button type="button" class="tool-btn shop-clear-checked">Vider les cochés</button>
+          <button type="button" class="tool-btn shop-clear-all">Tout vider</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    document.body.style.overflow = "hidden";
+    function close() {
+      document.body.style.overflow = "";
+      overlay.remove();
+      document.removeEventListener("keydown", onKey);
+    }
+    function onKey(e) { if (e.key === "Escape") close(); }
+    document.addEventListener("keydown", onKey);
+    overlay.querySelector(".cook-close").addEventListener("click", close);
+    overlay.querySelector(".shop-add-row").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = overlay.querySelector(".shop-add-input");
+      const name = input.value.trim();
+      if (!name) return;
+      SHOPPING.push({ id: shopItemId(), name, qty: "", checked: false, recipeTitle: "" });
+      saveShopping();
+      input.value = "";
+      renderShoppingList(overlay);
+    });
+    overlay.querySelector(".shop-clear-checked").addEventListener("click", () => {
+      SHOPPING = SHOPPING.filter(i => !i.checked);
+      saveShopping();
+      renderShoppingList(overlay);
+    });
+    overlay.querySelector(".shop-clear-all").addEventListener("click", () => {
+      if (SHOPPING.length && !confirm("Vider toute la liste de courses ?")) return;
+      SHOPPING = [];
+      saveShopping();
+      renderShoppingList(overlay);
+    });
+    renderShoppingList(overlay);
+  }
+
   const familySelectEl = document.getElementById("family-select");
   const favFilterEl = document.getElementById("fav-filter");
   const gridEl = document.getElementById("grid");
@@ -1591,9 +1840,17 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="M7.5 7.5 12 3l4.5 4.5"></path><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg>
                 Partager
               </button>
+              <button class="tool-btn shop-add-btn" type="button" data-shop-add="${r.id}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                Ajouter à la liste
+              </button>
             </div>
             ${r.intro ? `<p class="intro">${r.intro}</p>` : ""}
             ${r.sections.map(s => renderSection(s, fam)).join("")}
+            <div class="section note-section" style="--famcolor:${fam.color}">
+              <h4>Mes notes</h4>
+              <textarea class="note-input" data-note="${r.id}" placeholder="Variantes, ratés à éviter, ajustements…">${escapeHtml(NOTES[r.id] || "")}</textarea>
+            </div>
           </div>
         </div>
       </article>`;
@@ -1668,6 +1925,30 @@
         if (r) shareRecipe(r, btn);
       });
     });
+    gridEl.querySelectorAll(".shop-add-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const r = RECIPES.find(x => x.id === btn.dataset.shopAdd);
+        if (!r) return;
+        const added = addRecipeToShopping(r);
+        updateShoppingBadge();
+        const original = btn.innerHTML;
+        btn.textContent = added > 0
+          ? `${added} ingrédient${added > 1 ? "s" : ""} ajouté${added > 1 ? "s" : ""}`
+          : "Déjà dans la liste";
+        setTimeout(() => { btn.innerHTML = original; }, 1600);
+      });
+    });
+    gridEl.querySelectorAll(".note-input").forEach(ta => {
+      let debounce;
+      ta.addEventListener("input", () => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => {
+          const id = ta.dataset.note;
+          if (ta.value.trim() === "") delete NOTES[id]; else NOTES[id] = ta.value;
+          saveNotes();
+        }, 400);
+      });
+    });
   }
 
   searchInput.addEventListener("input", () => {
@@ -1692,7 +1973,10 @@
     render();
   });
 
+  document.getElementById("shopping-btn").addEventListener("click", openShoppingList);
+
   buildFamilySelect();
   render();
   openDeepLink();
+  updateShoppingBadge();
 </script>
