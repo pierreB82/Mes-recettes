@@ -29,6 +29,8 @@
     --fam-pain-bg: #ecdfc0;
     --fam-sauce: #55692a;
     --fam-sauce-bg: #dbe3c0;
+    --fam-dessert: #7a3a5c;
+    --fam-dessert-bg: #eddce4;
     --focus: #b5401c;
     --shadow: 0 1px 2px rgba(42,35,24,0.06), 0 6px 16px rgba(42,35,24,0.05);
   }
@@ -53,6 +55,8 @@
       --fam-pain-bg: #3a2c14;
       --fam-sauce: #a8c46a;
       --fam-sauce-bg: #2b3318;
+      --fam-dessert: #dd9cc4;
+      --fam-dessert-bg: #35232e;
       --focus: #e2703f;
       --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.35);
     }
@@ -76,6 +80,8 @@
     --fam-pain-bg: #3a2c14;
     --fam-sauce: #a8c46a;
     --fam-sauce-bg: #2b3318;
+    --fam-dessert: #dd9cc4;
+    --fam-dessert-bg: #35232e;
     --focus: #e2703f;
     --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.35);
   }
@@ -98,6 +104,8 @@
     --fam-pain-bg: #ecdfc0;
     --fam-sauce: #55692a;
     --fam-sauce-bg: #dbe3c0;
+    --fam-dessert: #7a3a5c;
+    --fam-dessert-bg: #eddce4;
     --focus: #b5401c;
     --shadow: 0 1px 2px rgba(42,35,24,0.06), 0 6px 16px rgba(42,35,24,0.05);
   }
@@ -486,6 +494,7 @@
     plat:     { label: "Plats principaux", color: "var(--fam-plat)", bg: "var(--fam-plat-bg)" },
     pain:     { label: "Pains & Boulangerie", color: "var(--fam-pain)", bg: "var(--fam-pain-bg)" },
     sauce:    { label: "Sauces & Condiments", color: "var(--fam-sauce)", bg: "var(--fam-sauce-bg)" },
+    dessert:  { label: "Desserts & Pâtisserie", color: "var(--fam-dessert)", bg: "var(--fam-dessert-bg)" },
   };
 
   const RECIPES = [
@@ -1077,6 +1086,195 @@
             "V1 (tangzhong eau) : mie blanche, très moelleuse, douce, tenue parfaite.",
             "V2 (tangzhong lait) : mie ultra-moelleuse, plus dorée, goût doux sans œuf.",
             "V3 (yudane) : mie filante, très élastique, style japonais traditionnel.",
+          ],
+        },
+      ],
+    },
+    {
+      id: "sauce-bbq",
+      title: "Sauce BBQ maison",
+      family: "sauce",
+      subtitle: "Sauce épaisse à napper",
+      time: "15 à 20 min de cuisson",
+      tags: ["bbq", "ketchup", "barbecue", "condiment"],
+      sections: [
+        {
+          heading: "Ingrédients",
+          ingredients: [
+            ["Cassonade", "61 g"],
+            ["Sel", "6 g"],
+            ["Poivre", "3,5 g"],
+            ["Cumin", "6 g"],
+            ["Poudre de chili", "8 g"],
+            ["Ketchup", "411 g"],
+            ["Sauce Worcestershire", "36 g"],
+            ["Vinaigre blanc", "72 g"],
+            ["Vinaigre de cidre", "72 g"],
+            ["Eau", "148 g"],
+          ],
+        },
+        {
+          heading: "Préparation",
+          steps: [
+            "Mélanger tous les ingrédients et faire chauffer à feu doux pendant 15 à 20 min.",
+            "Faire bouillir légèrement si besoin, pour réduire et obtenir de la consistance.",
+            "La sauce doit napper l'arrière d'une cuillère.",
+          ],
+        },
+      ],
+    },
+    {
+      id: "smash-burger",
+      title: "Smash burger — haché à 15 %",
+      family: "plat",
+      subtitle: "Protocole complet, cuisson plancha",
+      time: "Environ 3 min de cuisson par steak",
+      tags: ["smash burger", "plancha", "fromage", "bœuf"],
+      sections: [
+        {
+          heading: "Préparation de la viande",
+          steps: [
+            "Viande hachée 100 % bœuf, 15 % de matière grasse, grain moyen (éviter le trop fin).",
+            "Former des boules de 90 à 100 g, sans les tasser.",
+            "Ne pas saler ni poivrer avant cuisson — sinon la surface se mouille.",
+            "Laisser à température ambiante 15 à 20 min avant cuisson, pour que l'extérieur ne soit pas glacé.",
+          ],
+        },
+        {
+          heading: "Préparation de la plaque",
+          steps: [
+            "Chauffer la plancha ou la poêle en fonte à 240–250 °C.",
+            "Verser 1 c. à café d'huile neutre (arachide, pépins de raisin, tournesol haut oléique) par steak.",
+            "Attendre juste que l'huile soit fluide et brillante, pas fumante.",
+          ],
+        },
+        {
+          heading: "Le « smash »",
+          steps: [
+            "Poser la boule directement au centre de la flaque d'huile.",
+            "Recouvrir d'un petit carré de papier sulfurisé.",
+            "Écraser fermement avec la spatule pendant 10 secondes, pour obtenir un disque d'environ 1 cm d'épaisseur.",
+            "Ne plus toucher : cuisson sans bouger pendant 90 secondes, jusqu'à une croûte dorée et des bords croustillants.",
+          ],
+        },
+        {
+          heading: "Juste avant de retourner",
+          steps: [
+            "Avec un petit pinceau, badigeonner légèrement la face crue du steak avec un peu d'huile (quelques gouttes suffisent).",
+            "Retourner d'un geste sec : la nouvelle face frit immédiatement dans cette fine couche d'huile.",
+          ],
+        },
+        {
+          heading: "Deuxième face",
+          steps: [
+            "Laisser cuire 30 à 40 secondes maximum.",
+            "Saler et poivrer maintenant, sur la croûte cuite.",
+            "Poser immédiatement le fromage (cheddar, raclette, mimolette…).",
+            "Option : couvrir 10 secondes pour faire fondre le fromage.",
+          ],
+        },
+        {
+          heading: "Buns et montage",
+          steps: [
+            "Pendant la cuisson de la 2ᵉ face, toaster les buns sur la plaque, 20 à 30 secondes.",
+            "Montage : bun, sauce, steak + fromage, éventuellement 2ᵉ steak, cornichons, sauce, bun.",
+            "Laisser reposer 1 min sous papier alu ou cloche, pour que tout se lie.",
+          ],
+        },
+        {
+          heading: "Repères de cuisson",
+          notes: [
+            "Plancha ou poêle : 240–250 °C, 1 min 30 puis 40 secondes — trop chaud brûle la croûte.",
+            "Épaisseur du steak : environ 1 cm — plus épais donne moins de croustillant.",
+            "Huile totale : 2 c. à café maximum par steak — trop d'huile donne un effet friture.",
+          ],
+        },
+        {
+          heading: "Résultat attendu",
+          notes: [
+            "Croûte croustillante et dorée, légèrement caramélisée.",
+            "Cœur juteux, pas gras.",
+            "Parfum grillé typique du smash burger américain.",
+          ],
+        },
+      ],
+    },
+    {
+      id: "terrine-poulet",
+      title: "Terrine de poulet",
+      family: "entree",
+      subtitle: "Bardée, cuite au bain-marie — repos 4 jours",
+      time: "1 h de cuisson + 4 jours de repos",
+      tags: ["terrine", "poulet", "charcuterie maison", "foie de volaille"],
+      sections: [
+        {
+          heading: "Ingrédients",
+          ingredients: [
+            ["Chair à saucisse", "500 g"],
+            ["Blancs de poulet", "500 g"],
+            ["Lard fumé", "100 g"],
+            ["Foie de volaille", "100 g", "Le texte original indique « les raisins légèrement » à cet endroit — presque certainement une coquille de dictée pour « assaisonner légèrement » (sel, poivre)."],
+            ["Lard à barder", "1 paquet"],
+            ["Œuf", "1 par kg de farce"],
+            ["Thym, laurier, échalote", "au goût"],
+            ["Chapelure, Maïzena", "au goût"],
+            ["Porto", "2 c. à soupe"],
+            ["Cognac ou Armagnac", "1 c. à soupe"],
+            ["Crème fraîche", "1 c. à soupe"],
+            ["Sel", "15 g par kg de farce"],
+            ["Poivre", "5 g par kg de farce"],
+          ],
+        },
+        {
+          heading: "Cuisson",
+          steps: [
+            "Cuire au bain-marie chaud, four à 180 °C (eau du bain-marie en position basse).",
+            "Enfourner pour 1 heure.",
+            "Utiliser une sonde et arrêter la cuisson à 75 °C à cœur.",
+            "Passer sous le grill pour faire dorer le dessus.",
+          ],
+        },
+        {
+          heading: "Repos et conservation",
+          notes: [
+            "Laisser reposer 4 jours avant de déguster.",
+            "Se garde 15 jours maximum au réfrigérateur.",
+          ],
+        },
+      ],
+    },
+    {
+      id: "tiramisu",
+      title: "Tiramisu — version pâtissier moderne (sans alcool)",
+      family: "dessert",
+      subtitle: "Sans cuisson — repos 4 h minimum, 12 h idéal",
+      time: "20 min de préparation + 4 à 12 h de repos",
+      tags: ["tiramisu", "mascarpone", "café", "dessert"],
+      sections: [
+        {
+          heading: "Ingrédients",
+          ingredients: [
+            ["Mascarpone", "750 g"],
+            ["Jaunes d'œufs", "6"],
+            ["Sucre", "150 g"],
+            ["Sucre vanillé (optionnel)", "1 sachet"],
+            ["Sel", "1 pincée"],
+            ["Biscuits cuillère", "350 à 400 g"],
+            ["Café fort tiède", "350 à 400 ml"],
+            ["Cacao amer", "30 g"],
+          ],
+        },
+        {
+          heading: "Préparation",
+          steps: [
+            "Blanchir les jaunes avec le sucre pendant 4 minutes, jusqu'à obtenir une crème pâle et épaisse.",
+            "Ajouter le mascarpone en plusieurs fois et mélanger doucement, pour garder une crème lisse et dense.",
+            "Préparer le café tiède dans un plat large.",
+            "Tremper les biscuits 1 seconde par face, pas plus.",
+            "Montage : une couche de biscuits, une couche de crème, biscuits, crème.",
+            "Lisser la surface et couvrir.",
+            "Repos au réfrigérateur : 4 h minimum, 12 h idéal.",
+            "Saupoudrer de cacao juste avant de servir.",
           ],
         },
       ],
