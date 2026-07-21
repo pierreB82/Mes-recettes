@@ -448,6 +448,12 @@
   }
 </style>
 
+<script>
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) window.location.reload();
+  });
+</script>
+
 <div class="wrap">
   <header class="top">
     <div class="top-inner">
