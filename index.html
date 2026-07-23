@@ -672,6 +672,55 @@
     gap: 0.6rem;
     margin-top: 1.25rem;
   }
+
+  .scale-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    margin-bottom: 1.1rem;
+  }
+  .scale-label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: var(--ink-faint);
+  }
+  .scale-control {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    background: color-mix(in srgb, var(--ink) 5%, transparent);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 0.25rem 0.4rem;
+  }
+  .scale-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 5px;
+    border: 1px solid var(--line);
+    background: var(--paper-raised);
+    color: var(--ink);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .scale-btn:hover { background: var(--paper); }
+  .scale-value {
+    min-width: 2.4rem;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cook-scale-badge {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
 </style>
 
 <script>
@@ -1566,6 +1615,34 @@
     return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
 
+  const SCALE_STEPS = [0.5, 1, 1.5, 2, 3, 4, 6, 8, 10];
+  const SCALES = new Map();
+
+  function getScaleFactor(id) {
+    const idx = SCALES.has(id) ? SCALES.get(id) : SCALE_STEPS.indexOf(1);
+    return SCALE_STEPS[idx];
+  }
+
+  function formatScaleFactor(f) {
+    return "×" + String(f).replace(".", ",");
+  }
+
+  function scaleQtyString(str, factor) {
+    if (factor === 1 || !str) return str;
+    return str.replace(/\d+(?:[.,]\d+)?/g, m => {
+      const n = Math.round(parseFloat(m.replace(",", ".")) * factor * 100) / 100;
+      return String(n).replace(".", ",");
+    });
+  }
+
+  function applyScale(card, factor) {
+    card.querySelectorAll(".qty[data-base-qty]").forEach(el => {
+      el.textContent = scaleQtyString(el.dataset.baseQty, factor);
+    });
+    const valueEl = card.querySelector(".scale-value");
+    if (valueEl) valueEl.textContent = formatScaleFactor(factor);
+  }
+
   const NOTE_KEY = "recettes-notes";
   function loadNotes() {
     try { return JSON.parse(localStorage.getItem(NOTE_KEY) || "{}"); }
@@ -1601,15 +1678,16 @@
     el.hidden = n === 0;
   }
 
-  function addRecipeToShopping(r) {
+  function addRecipeToShopping(r, factor = 1) {
     const existingKeys = new Set(SHOPPING.map(i => i.name + "␟" + i.qty));
     let added = 0;
     for (const s of r.sections) {
       (s.ingredients || []).forEach(([name, qty]) => {
-        const key = name + "␟" + qty;
+        const scaledQty = scaleQtyString(qty, factor);
+        const key = name + "␟" + scaledQty;
         if (existingKeys.has(key)) return;
         existingKeys.add(key);
-        SHOPPING.push({ id: shopItemId(), name, qty, checked: false, recipeTitle: r.title });
+        SHOPPING.push({ id: shopItemId(), name, qty: scaledQty, checked: false, recipeTitle: r.title });
         added++;
       });
     }
@@ -1736,26 +1814,28 @@
       .join("");
   }
 
-  function ingredientRow([name, qty, caveat]) {
-    return `<li><span>${name}${caveat ? `<span class="caveat">${caveat}</span>` : ""}</span><span class="qty">${qty}</span></li>`;
+  function ingredientRow([name, qty, caveat], factor = 1, interactive = false) {
+    const displayQty = interactive ? qty : scaleQtyString(qty, factor);
+    const qtyAttrs = interactive ? ` data-base-qty="${escapeHtml(qty)}"` : "";
+    return `<li><span>${name}${caveat ? `<span class="caveat">${caveat}</span>` : ""}</span><span class="qty"${qtyAttrs}>${displayQty}</span></li>`;
   }
 
-  function renderSection(s, fam) {
+  function renderSection(s, fam, factor = 1, interactive = false) {
     let html = `<div class="section" style="--famcolor:${fam.color}">`;
     if (s.heading) html += `<h4>${s.heading}</h4>`;
-    if (s.ingredients) html += `<ul class="ing-list">${s.ingredients.map(ingredientRow).join("")}</ul>`;
+    if (s.ingredients) html += `<ul class="ing-list">${s.ingredients.map(ing => ingredientRow(ing, factor, interactive)).join("")}</ul>`;
     if (s.steps) html += `<ol class="steps">${s.steps.map(t => `<li>${t}</li>`).join("")}</ol>`;
     if (s.notes) html += `<ul class="notes">${s.notes.map(t => `<li>${t}</li>`).join("")}</ul>`;
     html += `</div>`;
     return html;
   }
 
-  function recipeText(r) {
-    const lines = [r.title, r.subtitle, ""];
+  function recipeText(r, factor = 1) {
+    const lines = [r.title, factor !== 1 ? `${r.subtitle} (quantités ${formatScaleFactor(factor)})` : r.subtitle, ""];
     if (r.intro) lines.push(r.intro, "");
     for (const s of r.sections) {
       if (s.heading) lines.push(s.heading.toUpperCase());
-      (s.ingredients || []).forEach(([name, qty]) => lines.push(`- ${name} : ${qty}`));
+      (s.ingredients || []).forEach(([name, qty]) => lines.push(`- ${name} : ${scaleQtyString(qty, factor)}`));
       (s.steps || []).forEach((t, i) => lines.push(`${i + 1}. ${t}`));
       (s.notes || []).forEach(t => lines.push(`- ${t}`));
       lines.push("");
@@ -1763,9 +1843,9 @@
     return lines.join("\n").trim();
   }
 
-  function shareRecipe(r, btn) {
+  function shareRecipe(r, btn, factor = 1) {
     const url = location.origin + location.pathname + "#" + r.id;
-    const text = recipeText(r);
+    const text = recipeText(r, factor);
     if (navigator.share) {
       navigator.share({ title: r.title, text, url }).catch(() => {});
       return;
@@ -1779,18 +1859,18 @@
     }
   }
 
-  function openCookMode(r) {
+  function openCookMode(r, factor = 1) {
     const fam = FAMILIES[r.family];
     const overlay = document.createElement("div");
     overlay.className = "cook-overlay";
     overlay.innerHTML = `
       <div class="cook-header">
-        <h2 class="display">${r.title}</h2>
+        <h2 class="display">${r.title}${factor !== 1 ? ` <span class="cook-scale-badge">${formatScaleFactor(factor)}</span>` : ""}</h2>
         <button class="cook-close" type="button" aria-label="Fermer le mode cuisine">✕</button>
       </div>
       <div class="cook-body">
         ${r.intro ? `<p class="intro">${r.intro}</p>` : ""}
-        ${r.sections.map(s => renderSection(s, fam)).join("")}
+        ${r.sections.map(s => renderSection(s, fam, factor, false)).join("")}
       </div>`;
     document.body.appendChild(overlay);
     document.body.style.overflow = "hidden";
@@ -1845,8 +1925,16 @@
                 Ajouter à la liste
               </button>
             </div>
+            <div class="scale-row">
+              <span class="scale-label">Portions</span>
+              <div class="scale-control">
+                <button type="button" class="scale-btn" data-scale-dir="down" aria-label="Réduire les quantités">−</button>
+                <span class="scale-value">×1</span>
+                <button type="button" class="scale-btn" data-scale-dir="up" aria-label="Augmenter les quantités">+</button>
+              </div>
+            </div>
             ${r.intro ? `<p class="intro">${r.intro}</p>` : ""}
-            ${r.sections.map(s => renderSection(s, fam)).join("")}
+            ${r.sections.map(s => renderSection(s, fam, 1, true)).join("")}
             <div class="section note-section" style="--famcolor:${fam.color}">
               <h4>Mes notes</h4>
               <textarea class="note-input" data-note="${r.id}" placeholder="Variantes, ratés à éviter, ajustements…">${escapeHtml(NOTES[r.id] || "")}</textarea>
@@ -1897,6 +1985,10 @@
       ? `${RECIPES.length} recettes au total`
       : `${visible.length} recette${visible.length === 1 ? "" : "s"} trouvée${visible.length === 1 ? "" : "s"}`;
 
+    gridEl.querySelectorAll(".card").forEach(card => {
+      if (SCALES.has(card.dataset.id)) applyScale(card, SCALE_STEPS[SCALES.get(card.dataset.id)]);
+    });
+
     gridEl.querySelectorAll(".card-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const card = btn.closest(".card");
@@ -1913,23 +2005,33 @@
         render();
       });
     });
+    gridEl.querySelectorAll(".scale-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const card = btn.closest(".card");
+        const id = card.dataset.id;
+        let idx = SCALES.has(id) ? SCALES.get(id) : SCALE_STEPS.indexOf(1);
+        idx = btn.dataset.scaleDir === "up" ? Math.min(idx + 1, SCALE_STEPS.length - 1) : Math.max(idx - 1, 0);
+        SCALES.set(id, idx);
+        applyScale(card, SCALE_STEPS[idx]);
+      });
+    });
     gridEl.querySelectorAll(".cook-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const r = RECIPES.find(x => x.id === btn.dataset.cook);
-        if (r) openCookMode(r);
+        if (r) openCookMode(r, getScaleFactor(r.id));
       });
     });
     gridEl.querySelectorAll(".share-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const r = RECIPES.find(x => x.id === btn.dataset.share);
-        if (r) shareRecipe(r, btn);
+        if (r) shareRecipe(r, btn, getScaleFactor(r.id));
       });
     });
     gridEl.querySelectorAll(".shop-add-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const r = RECIPES.find(x => x.id === btn.dataset.shopAdd);
         if (!r) return;
-        const added = addRecipeToShopping(r);
+        const added = addRecipeToShopping(r, getScaleFactor(r.id));
         updateShoppingBadge();
         const original = btn.innerHTML;
         btn.textContent = added > 0
