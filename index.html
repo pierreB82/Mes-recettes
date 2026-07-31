@@ -670,6 +670,7 @@
 
   .shop-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.6rem;
     margin-top: 1.25rem;
   }
@@ -1745,6 +1746,32 @@
     });
   }
 
+  function shoppingListText() {
+    if (SHOPPING.length === 0) return "Liste de courses vide.";
+    const lines = ["Liste de courses", ""];
+    SHOPPING.forEach(item => {
+      const box = item.checked ? "[x]" : "[ ]";
+      const qty = item.qty ? ` — ${item.qty}` : "";
+      lines.push(`${box} ${item.name}${qty}`);
+    });
+    return lines.join("\n");
+  }
+
+  function shareShoppingList(btn) {
+    const text = shoppingListText();
+    if (navigator.share) {
+      navigator.share({ title: "Liste de courses", text }).catch(() => {});
+      return;
+    }
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btn.innerHTML;
+        btn.textContent = "Copié dans le presse-papiers";
+        setTimeout(() => { btn.innerHTML = original; }, 1600);
+      }).catch(() => {});
+    }
+  }
+
   function openShoppingList() {
     const overlay = document.createElement("div");
     overlay.className = "cook-overlay shop-overlay";
@@ -1761,6 +1788,10 @@
         <ul class="shop-list"></ul>
         <p class="empty shop-empty" hidden><span class="display">Liste vide.</span></p>
         <div class="shop-actions">
+          <button type="button" class="tool-btn shop-share">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="M7.5 7.5 12 3l4.5 4.5"></path><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg>
+            Envoyer
+          </button>
           <button type="button" class="tool-btn shop-clear-checked">Vider les cochés</button>
           <button type="button" class="tool-btn shop-clear-all">Tout vider</button>
         </div>
@@ -1784,6 +1815,9 @@
       saveShopping();
       input.value = "";
       renderShoppingList(overlay);
+    });
+    overlay.querySelector(".shop-share").addEventListener("click", (e) => {
+      shareShoppingList(e.currentTarget);
     });
     overlay.querySelector(".shop-clear-checked").addEventListener("click", () => {
       SHOPPING = SHOPPING.filter(i => !i.checked);
