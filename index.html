@@ -728,14 +728,18 @@
     display: inline-flex;
     align-items: center;
     font: inherit;
+    font-size: 0.85em;
     font-weight: 700;
     color: var(--accent);
     background: color-mix(in srgb, var(--accent) 12%, transparent);
     border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
-    border-radius: 5px;
-    padding: 0 0.3rem;
+    border-radius: 999px;
+    padding: 0.05rem 0.55rem;
+    margin-left: 0.4rem;
     cursor: pointer;
-    line-height: 1.3;
+    line-height: 1.4;
+    vertical-align: middle;
+    white-space: nowrap;
   }
   .timer-chip:hover { background: color-mix(in srgb, var(--accent) 20%, transparent); }
 
@@ -1865,8 +1869,9 @@
     return 1;
   }
 
-  function linkifyStep(text) {
-    return text.replace(DURATION_RE, (match, ...rest) => {
+  function extractDurations(text) {
+    const found = [];
+    text.replace(DURATION_RE, (match, ...rest) => {
       const g = rest[rest.length - 1];
       let seconds = null;
       if (g.r1 !== undefined) {
@@ -1876,9 +1881,18 @@
       } else if (g.pnum !== undefined) {
         seconds = Math.round(parseFloat(g.pnum.replace(",", ".")) * unitMultiplier(g.punit));
       }
-      if (!seconds || seconds <= 0) return match;
-      return `<button type="button" class="timer-chip" data-seconds="${seconds}">${match}</button>`;
+      if (seconds && seconds > 0) found.push({ label: match, seconds });
+      return match;
     });
+    return found;
+  }
+
+  function stepHTML(text) {
+    const durations = extractDurations(text);
+    const chips = durations
+      .map(d => ` <button type="button" class="timer-chip" data-seconds="${d.seconds}">⏱ ${d.label}</button>`)
+      .join("");
+    return `<li><span class="step-text">${text}${chips}</span></li>`;
   }
 
   let TIMER_SEQ = 0;
@@ -1903,19 +1917,33 @@
     return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
   }
 
+  let audioCtx = null;
+  function unlockAudio() {
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch { return; }
+    }
+    if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
+  }
+
   function playBeep() {
+    if (!audioCtx) return;
+    if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
     try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = "sine";
-      o.frequency.value = 880;
-      g.gain.value = 0.15;
-      o.connect(g);
-      g.connect(ctx.destination);
-      o.start();
-      o.stop(ctx.currentTime + 0.35);
-      o.onended = () => ctx.close();
+      const now = audioCtx.currentTime;
+      for (let i = 0; i < 3; i++) {
+        const start = now + i * 0.4;
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = "sine";
+        o.frequency.value = 880;
+        g.gain.setValueAtTime(0.0001, start);
+        g.gain.exponentialRampToValueAtTime(0.3, start + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, start + 0.3);
+        o.connect(g);
+        g.connect(audioCtx.destination);
+        o.start(start);
+        o.stop(start + 0.32);
+      }
     } catch {}
   }
 
@@ -1936,7 +1964,10 @@
 
   function removeTimer(id) {
     const t = ACTIVE_TIMERS.get(id);
-    if (t && t.tickHandle) clearInterval(t.tickHandle);
+    if (t) {
+      if (t.tickHandle) clearInterval(t.tickHandle);
+      if (t.alarmHandle) clearInterval(t.alarmHandle);
+    }
     ACTIVE_TIMERS.delete(id);
     if (ACTIVE_TIMERS.size === 0) stopTitleFlash();
     renderTimerPanel();
@@ -1966,11 +1997,12 @@
 
   function startTimer(seconds, label) {
     if (!seconds || seconds <= 0) return;
+    unlockAudio();
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().catch(() => {});
     }
     const id = "t" + (++TIMER_SEQ);
-    const timer = { seconds, remaining: seconds, label, done: false, tickHandle: null };
+    const timer = { seconds, remaining: seconds, label, done: false, tickHandle: null, alarmHandle: null };
     timer.tickHandle = setInterval(() => {
       timer.remaining -= 1;
       if (timer.remaining <= 0) {
@@ -1979,6 +2011,7 @@
         clearInterval(timer.tickHandle);
         playBeep();
         flashTitle(label);
+        timer.alarmHandle = setInterval(playBeep, 4000);
         if ("Notification" in window && Notification.permission === "granted") {
           try { new Notification("Minuteur terminé", { body: label }); } catch {}
         }
@@ -2237,7 +2270,7 @@
     let html = `<div class="section" style="--famcolor:${fam.color}">`;
     if (s.heading) html += `<h4>${s.heading}</h4>`;
     if (s.ingredients) html += `<ul class="ing-list">${s.ingredients.map(ing => ingredientRow(ing, factor, interactive)).join("")}</ul>`;
-    if (s.steps) html += `<ol class="steps">${s.steps.map(t => `<li>${linkifyStep(t)}</li>`).join("")}</ol>`;
+    if (s.steps) html += `<ol class="steps">${s.steps.map(t => stepHTML(t)).join("")}</ol>`;
     if (s.notes) html += `<ul class="notes">${s.notes.map(t => `<li>${t}</li>`).join("")}</ul>`;
     html += `</div>`;
     return html;
