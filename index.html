@@ -620,7 +620,6 @@
   .edit-remove-section, .edit-token-clear-x { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper-raised); color: var(--ink-soft); cursor: pointer; }
   .edit-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.2rem; }
   .edit-status { font-size: 0.85rem; color: var(--ink-soft); min-height: 1.2em; }
-  .add-recipe-btn[hidden] { display: none; }
 
   .shopping-btn { position: relative; }
   .shopping-count[hidden] { display: none; }
@@ -892,9 +891,6 @@
         <button id="shopping-btn" class="fav-filter-btn shopping-btn" type="button" aria-label="Liste de courses">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
           <span id="shopping-count" class="shopping-count" hidden>0</span>
-        </button>
-        <button id="add-recipe-btn" class="fav-filter-btn add-recipe-btn" type="button" aria-label="Ajouter une recette" hidden>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
         <button id="edit-settings-btn" class="fav-filter-btn" type="button" aria-label="Paramètres d'édition">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
@@ -2506,12 +2502,6 @@
       </article>`;
   }
 
-  function slugify(text) {
-    const base = (text || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-+|-+$)/g, "");
-    return base || `recette-${Math.floor(Math.random() * 1e9)}`;
-  }
-
   function parseIngredientsText(text) {
     return text.split("\n").map(l => l.trim()).filter(Boolean).map(line => {
       const [name, qty, caveat] = line.split("|").map(p => p.trim());
@@ -2563,12 +2553,10 @@
   }
 
   function recipeFromForm(overlay, editingId) {
-    const base = editingId ? { ...RECIPES.find(r => r.id === editingId) } : {};
+    const base = { ...RECIPES.find(r => r.id === editingId) };
     delete base._search;
     delete base._tokens;
-    const title = overlay.querySelector(".edit-title").value.trim();
-    base.title = title;
-    base.id = editingId || slugify(title);
+    base.title = overlay.querySelector(".edit-title").value.trim();
     base.family = overlay.querySelector(".edit-family").value;
     base.subtitle = overlay.querySelector(".edit-subtitle").value.trim();
     base.time = overlay.querySelector(".edit-time").value.trim();
@@ -2627,32 +2615,32 @@
   }
 
   function openRecipeEditor(recipe) {
-    const editingId = recipe ? recipe.id : null;
+    const editingId = recipe.id;
     const overlay = document.createElement("div");
     overlay.className = "cook-overlay";
     overlay.innerHTML = `
       <div class="cook-header">
-        <h2>${editingId ? "Modifier la recette" : "Nouvelle recette"}</h2>
+        <h2>Modifier la recette</h2>
         <button class="cook-close" type="button" aria-label="Fermer">✕</button>
       </div>
       <div class="cook-body edit-form">
-        <label>Titre <input type="text" class="edit-title" value="${escapeHtml(recipe?.title || "")}"></label>
+        <label>Titre <input type="text" class="edit-title" value="${escapeHtml(recipe.title || "")}"></label>
         <label>Famille
           <select class="edit-family">
-            ${Object.entries(FAMILIES).map(([k, f]) => `<option value="${k}"${recipe?.family === k ? " selected" : ""}>${f.label}</option>`).join("")}
+            ${Object.entries(FAMILIES).map(([k, f]) => `<option value="${k}"${recipe.family === k ? " selected" : ""}>${f.label}</option>`).join("")}
           </select>
         </label>
-        <label>Sous-titre <input type="text" class="edit-subtitle" value="${escapeHtml(recipe?.subtitle || "")}"></label>
-        <label>Temps <input type="text" class="edit-time" value="${escapeHtml(recipe?.time || "")}"></label>
+        <label>Sous-titre <input type="text" class="edit-subtitle" value="${escapeHtml(recipe.subtitle || "")}"></label>
+        <label>Temps <input type="text" class="edit-time" value="${escapeHtml(recipe.time || "")}"></label>
         <label>Tags <span class="edit-hint">(séparés par des virgules)</span>
-          <input type="text" class="edit-tags" value="${escapeHtml((recipe?.tags || []).join(", "))}"></label>
-        <label>Introduction <textarea class="edit-intro" rows="2">${escapeHtml(recipe?.intro || "")}</textarea></label>
-        <div class="edit-sections">${(recipe?.sections?.length ? recipe.sections : [{}]).map(sectionEditorHTML).join("")}</div>
+          <input type="text" class="edit-tags" value="${escapeHtml((recipe.tags || []).join(", "))}"></label>
+        <label>Introduction <textarea class="edit-intro" rows="2">${escapeHtml(recipe.intro || "")}</textarea></label>
+        <div class="edit-sections">${(recipe.sections?.length ? recipe.sections : [{}]).map(sectionEditorHTML).join("")}</div>
         <button type="button" class="tool-btn edit-add-section">+ Ajouter une section</button>
         <p class="edit-status" role="status"></p>
         <div class="edit-actions">
           <button type="button" class="tool-btn edit-save-btn">Publier</button>
-          ${editingId ? `<button type="button" class="tool-btn edit-delete-btn">Supprimer la recette</button>` : ""}
+          <button type="button" class="tool-btn edit-delete-btn">Supprimer la recette</button>
         </div>
       </div>`;
     document.body.appendChild(overlay);
@@ -2666,9 +2654,7 @@
     });
     bindSectionRemovers(overlay);
     overlay.querySelector(".edit-save-btn").addEventListener("click", () => saveRecipeFromForm(overlay, editingId, close));
-    if (editingId) {
-      overlay.querySelector(".edit-delete-btn").addEventListener("click", () => deleteRecipe(editingId, close));
-    }
+    overlay.querySelector(".edit-delete-btn").addEventListener("click", () => deleteRecipe(editingId, close));
   }
 
   async function saveRecipeFromForm(overlay, editingId, close) {
@@ -2677,17 +2663,11 @@
     const title = overlay.querySelector(".edit-title").value.trim();
     if (!title) { statusEl.textContent = "Le titre est obligatoire."; return; }
     const recipe = recipeFromForm(overlay, editingId);
-    if (!editingId && RECIPES.some(r => r.id === recipe.id)) {
-      statusEl.textContent = "Une recette avec un identifiant très proche existe déjà : choisis un titre différent.";
-      return;
-    }
-    const nextRecipes = editingId
-      ? RECIPES.map(r => r.id === editingId ? recipe : r)
-      : [...RECIPES, recipe];
+    const nextRecipes = RECIPES.map(r => r.id === editingId ? recipe : r);
     saveBtn.disabled = true;
     statusEl.textContent = "Publication en cours…";
     try {
-      await publishRecipes(nextRecipes, `${editingId ? "Modifie" : "Ajoute"} la recette « ${recipe.title} »`);
+      await publishRecipes(nextRecipes, `Modifie la recette « ${recipe.title} »`);
       RECIPES = nextRecipes;
       RECIPES.forEach(indexRecipe);
       buildFamilySelect();
@@ -2718,7 +2698,6 @@
   }
 
   function updateEditUI() {
-    document.getElementById("add-recipe-btn").hidden = !isEditMode();
     render();
   }
 
@@ -2925,10 +2904,8 @@
   });
 
   document.getElementById("shopping-btn").addEventListener("click", openShoppingList);
-  document.getElementById("add-recipe-btn").addEventListener("click", () => openRecipeEditor());
   document.getElementById("edit-settings-btn").addEventListener("click", openEditSettings);
 
-  document.getElementById("add-recipe-btn").hidden = !isEditMode();
   buildFamilySelect();
   render();
   openDeepLink();
