@@ -595,6 +595,33 @@
   .note-input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
   .note-input::placeholder { color: var(--ink-faint); }
 
+  .edit-form label, .edit-help { display: block; font-size: 0.85rem; font-weight: 600; color: var(--ink-soft); margin: 0 0 1rem; }
+  .edit-form input[type="text"], .edit-form input[type="password"], .edit-form select, .edit-form textarea {
+    display: block;
+    width: 100%;
+    margin-top: 0.35rem;
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 400;
+    color: var(--ink);
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 0.55rem 0.7rem;
+  }
+  .edit-form textarea { resize: vertical; min-height: 3.4rem; }
+  .edit-form input:focus, .edit-form select:focus, .edit-form textarea:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+  .edit-hint { font-weight: 400; color: var(--ink-faint); }
+  .edit-help { list-style: decimal; padding-left: 1.2rem; }
+  .edit-help li { margin-bottom: 0.3rem; }
+  .edit-section { border: 1px solid var(--line); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: color-mix(in srgb, var(--ink) 3%, transparent); }
+  .edit-section-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.9rem; }
+  .edit-section-head input { margin-top: 0; }
+  .edit-remove-section, .edit-token-clear-x { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper-raised); color: var(--ink-soft); cursor: pointer; }
+  .edit-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.2rem; }
+  .edit-status { font-size: 0.85rem; color: var(--ink-soft); min-height: 1.2em; }
+  .add-recipe-btn[hidden] { display: none; }
+
   .shopping-btn { position: relative; }
   .shopping-count[hidden] { display: none; }
   .shopping-count {
@@ -866,6 +893,12 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
           <span id="shopping-count" class="shopping-count" hidden>0</span>
         </button>
+        <button id="add-recipe-btn" class="fav-filter-btn add-recipe-btn" type="button" aria-label="Ajouter une recette" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button id="edit-settings-btn" class="fav-filter-btn" type="button" aria-label="Paramètres d'édition">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
       </div>
     </div>
   </header>
@@ -890,7 +923,8 @@
     dessert:  { label: "Desserts & Pâtisserie", color: "var(--fam-dessert)", bg: "var(--fam-dessert-bg)" },
   };
 
-  const RECIPES = [
+  /* RECIPES:START */
+  let RECIPES = [
     {
       id: "gougeres",
       title: "Gougères au fromage — version dense",
@@ -1854,6 +1888,7 @@
       ],
     },
   ];
+  /* RECIPES:END */
 
   function normalize(s) {
     return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -1891,10 +1926,28 @@
     }
     return normalize(parts.join(" "));
   }
-  RECIPES.forEach(r => {
+  RECIPES.forEach(indexRecipe);
+
+  const REPO_OWNER = "pierreb82";
+  const REPO_NAME = "mes-recettes";
+  const REPO_BRANCH = "main";
+  const REPO_FILE_PATH = "index.html";
+  const EDIT_TOKEN_KEY = "recettes-edit-token";
+  function loadEditToken() {
+    try { return localStorage.getItem(EDIT_TOKEN_KEY) || ""; } catch { return ""; }
+  }
+  function saveEditToken(token) {
+    try {
+      if (token) localStorage.setItem(EDIT_TOKEN_KEY, token);
+      else localStorage.removeItem(EDIT_TOKEN_KEY);
+    } catch {}
+  }
+  let EDIT_TOKEN = loadEditToken();
+  function isEditMode() { return !!EDIT_TOKEN; }
+  function indexRecipe(r) {
     r._search = searchText(r);
     r._tokens = tokenize(r._search);
-  });
+  }
 
   const FAV_KEY = "recettes-favoris";
   function loadFavorites() {
@@ -2420,6 +2473,11 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                 Ajouter à la liste
               </button>
+              ${isEditMode() ? `
+              <button class="tool-btn edit-recipe-btn" type="button" data-edit="${r.id}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+                Modifier
+              </button>` : ""}
             </div>
             <div class="scale-row">
               <span class="scale-label">Portions</span>
@@ -2446,6 +2504,269 @@
           </div>
         </div>
       </article>`;
+  }
+
+  function slugify(text) {
+    const base = (text || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-+|-+$)/g, "");
+    return base || `recette-${Math.floor(Math.random() * 1e9)}`;
+  }
+
+  function parseIngredientsText(text) {
+    return text.split("\n").map(l => l.trim()).filter(Boolean).map(line => {
+      const [name, qty, caveat] = line.split("|").map(p => p.trim());
+      return caveat ? [name, qty || "", caveat] : [name, qty || ""];
+    });
+  }
+  function parseLinesText(text) {
+    return text.split("\n").map(l => l.trim()).filter(Boolean);
+  }
+
+  function sectionEditorHTML(s = {}) {
+    return `
+      <div class="edit-section">
+        <div class="edit-section-head">
+          <input type="text" class="edit-heading" placeholder="Titre de la section (ex. Ingrédients)" value="${escapeHtml(s.heading || "")}">
+          <button type="button" class="edit-remove-section" aria-label="Supprimer cette section">✕</button>
+        </div>
+        <label>Ingrédients <span class="edit-hint">(un par ligne : Nom | Quantité | Remarque facultative)</span>
+          <textarea class="edit-ingredients" rows="3">${escapeHtml((s.ingredients || []).map(i => i.join(" | ")).join("\n"))}</textarea>
+        </label>
+        <label>Étapes <span class="edit-hint">(une par ligne)</span>
+          <textarea class="edit-steps" rows="3">${escapeHtml((s.steps || []).join("\n"))}</textarea>
+        </label>
+        <label>Notes <span class="edit-hint">(une par ligne)</span>
+          <textarea class="edit-notes" rows="2">${escapeHtml((s.notes || []).join("\n"))}</textarea>
+        </label>
+      </div>`;
+  }
+
+  function bindSectionRemovers(overlay) {
+    overlay.querySelectorAll(".edit-remove-section").forEach(btn => {
+      btn.onclick = () => btn.closest(".edit-section").remove();
+    });
+  }
+
+  function sectionsFromForm(overlay) {
+    return [...overlay.querySelectorAll(".edit-section")].map(el => {
+      const heading = el.querySelector(".edit-heading").value.trim();
+      const ingredients = parseIngredientsText(el.querySelector(".edit-ingredients").value);
+      const steps = parseLinesText(el.querySelector(".edit-steps").value);
+      const notes = parseLinesText(el.querySelector(".edit-notes").value);
+      const section = {};
+      if (heading) section.heading = heading;
+      if (ingredients.length) section.ingredients = ingredients;
+      if (steps.length) section.steps = steps;
+      if (notes.length) section.notes = notes;
+      return section;
+    }).filter(s => Object.keys(s).length > 0);
+  }
+
+  function recipeFromForm(overlay, editingId) {
+    const base = editingId ? { ...RECIPES.find(r => r.id === editingId) } : {};
+    delete base._search;
+    delete base._tokens;
+    const title = overlay.querySelector(".edit-title").value.trim();
+    base.title = title;
+    base.id = editingId || slugify(title);
+    base.family = overlay.querySelector(".edit-family").value;
+    base.subtitle = overlay.querySelector(".edit-subtitle").value.trim();
+    base.time = overlay.querySelector(".edit-time").value.trim();
+    base.tags = overlay.querySelector(".edit-tags").value.split(",").map(t => t.trim()).filter(Boolean);
+    const intro = overlay.querySelector(".edit-intro").value.trim();
+    if (intro) base.intro = intro; else delete base.intro;
+    base.sections = sectionsFromForm(overlay);
+    return base;
+  }
+
+  function serializeRecipes(list) {
+    const clean = list.map(({ _search, _tokens, ...rest }) => rest);
+    const json = JSON.stringify(clean, null, 2);
+    return json.split("\n").map((line, i) => i === 0 ? line : "  " + line).join("\n");
+  }
+
+  function b64EncodeUtf8(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+  }
+  function b64DecodeUtf8(b64) {
+    return decodeURIComponent(escape(atob(b64)));
+  }
+
+  async function githubGetFile() {
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${REPO_FILE_PATH}?ref=${REPO_BRANCH}`, {
+      headers: { Authorization: `Bearer ${EDIT_TOKEN}`, Accept: "application/vnd.github+json" },
+    });
+    if (!res.ok) throw new Error(res.status === 401 ? "Jeton invalide ou expiré." : `Lecture du fichier impossible (${res.status}).`);
+    const data = await res.json();
+    return { sha: data.sha, content: b64DecodeUtf8(data.content) };
+  }
+
+  async function githubPutFile(newContent, sha, message) {
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${REPO_FILE_PATH}`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${EDIT_TOKEN}`, Accept: "application/vnd.github+json", "Content-Type": "application/json" },
+      body: JSON.stringify({ message, content: b64EncodeUtf8(newContent), sha, branch: REPO_BRANCH }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Publication impossible (${res.status}).`);
+    }
+  }
+
+  async function publishRecipes(list, commitMessage) {
+    const { sha, content } = await githubGetFile();
+    const startTag = "/* RECIPES:START */";
+    const endTag = "/* RECIPES:END */";
+    const start = content.indexOf(startTag);
+    const end = content.indexOf(endTag);
+    if (start === -1 || end === -1) throw new Error("Marqueurs RECIPES introuvables dans le fichier distant.");
+    const before = content.slice(0, start);
+    const after = content.slice(end + endTag.length);
+    const block = `${startTag}\n  let RECIPES = ${serializeRecipes(list)};\n  ${endTag}`;
+    await githubPutFile(before + block + after, sha, commitMessage);
+  }
+
+  function openRecipeEditor(recipe) {
+    const editingId = recipe ? recipe.id : null;
+    const overlay = document.createElement("div");
+    overlay.className = "cook-overlay";
+    overlay.innerHTML = `
+      <div class="cook-header">
+        <h2>${editingId ? "Modifier la recette" : "Nouvelle recette"}</h2>
+        <button class="cook-close" type="button" aria-label="Fermer">✕</button>
+      </div>
+      <div class="cook-body edit-form">
+        <label>Titre <input type="text" class="edit-title" value="${escapeHtml(recipe?.title || "")}"></label>
+        <label>Famille
+          <select class="edit-family">
+            ${Object.entries(FAMILIES).map(([k, f]) => `<option value="${k}"${recipe?.family === k ? " selected" : ""}>${f.label}</option>`).join("")}
+          </select>
+        </label>
+        <label>Sous-titre <input type="text" class="edit-subtitle" value="${escapeHtml(recipe?.subtitle || "")}"></label>
+        <label>Temps <input type="text" class="edit-time" value="${escapeHtml(recipe?.time || "")}"></label>
+        <label>Tags <span class="edit-hint">(séparés par des virgules)</span>
+          <input type="text" class="edit-tags" value="${escapeHtml((recipe?.tags || []).join(", "))}"></label>
+        <label>Introduction <textarea class="edit-intro" rows="2">${escapeHtml(recipe?.intro || "")}</textarea></label>
+        <div class="edit-sections">${(recipe?.sections?.length ? recipe.sections : [{}]).map(sectionEditorHTML).join("")}</div>
+        <button type="button" class="tool-btn edit-add-section">+ Ajouter une section</button>
+        <p class="edit-status" role="status"></p>
+        <div class="edit-actions">
+          <button type="button" class="tool-btn edit-save-btn">Publier</button>
+          ${editingId ? `<button type="button" class="tool-btn edit-delete-btn">Supprimer la recette</button>` : ""}
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    function close() { overlay.remove(); document.removeEventListener("keydown", onKey); }
+    function onKey(e) { if (e.key === "Escape") close(); }
+    document.addEventListener("keydown", onKey);
+    overlay.querySelector(".cook-close").addEventListener("click", close);
+    overlay.querySelector(".edit-add-section").addEventListener("click", () => {
+      overlay.querySelector(".edit-sections").insertAdjacentHTML("beforeend", sectionEditorHTML());
+      bindSectionRemovers(overlay);
+    });
+    bindSectionRemovers(overlay);
+    overlay.querySelector(".edit-save-btn").addEventListener("click", () => saveRecipeFromForm(overlay, editingId, close));
+    if (editingId) {
+      overlay.querySelector(".edit-delete-btn").addEventListener("click", () => deleteRecipe(editingId, close));
+    }
+  }
+
+  async function saveRecipeFromForm(overlay, editingId, close) {
+    const statusEl = overlay.querySelector(".edit-status");
+    const saveBtn = overlay.querySelector(".edit-save-btn");
+    const title = overlay.querySelector(".edit-title").value.trim();
+    if (!title) { statusEl.textContent = "Le titre est obligatoire."; return; }
+    const recipe = recipeFromForm(overlay, editingId);
+    if (!editingId && RECIPES.some(r => r.id === recipe.id)) {
+      statusEl.textContent = "Une recette avec un identifiant très proche existe déjà : choisis un titre différent.";
+      return;
+    }
+    const nextRecipes = editingId
+      ? RECIPES.map(r => r.id === editingId ? recipe : r)
+      : [...RECIPES, recipe];
+    saveBtn.disabled = true;
+    statusEl.textContent = "Publication en cours…";
+    try {
+      await publishRecipes(nextRecipes, `${editingId ? "Modifie" : "Ajoute"} la recette « ${recipe.title} »`);
+      RECIPES = nextRecipes;
+      RECIPES.forEach(indexRecipe);
+      buildFamilySelect();
+      render();
+      statusEl.textContent = "Publié. Les autres appareils verront la mise à jour au prochain chargement.";
+      setTimeout(close, 1800);
+    } catch (e) {
+      statusEl.textContent = "Erreur : " + e.message;
+    } finally {
+      saveBtn.disabled = false;
+    }
+  }
+
+  async function deleteRecipe(editingId, close) {
+    const recipe = RECIPES.find(r => r.id === editingId);
+    if (!recipe) return;
+    if (!confirm(`Supprimer définitivement « ${recipe.title} » ? La suppression est publiée immédiatement.`)) return;
+    const nextRecipes = RECIPES.filter(r => r.id !== editingId);
+    try {
+      await publishRecipes(nextRecipes, `Supprime la recette « ${recipe.title} »`);
+      RECIPES = nextRecipes;
+      buildFamilySelect();
+      render();
+      close();
+    } catch (e) {
+      alert("Erreur : " + e.message);
+    }
+  }
+
+  function updateEditUI() {
+    document.getElementById("add-recipe-btn").hidden = !isEditMode();
+    render();
+  }
+
+  function openEditSettings() {
+    const overlay = document.createElement("div");
+    overlay.className = "cook-overlay";
+    const hasToken = isEditMode();
+    overlay.innerHTML = `
+      <div class="cook-header">
+        <h2>Édition des recettes</h2>
+        <button class="cook-close" type="button" aria-label="Fermer">✕</button>
+      </div>
+      <div class="cook-body edit-form">
+        <p>Pour modifier, ajouter ou supprimer des recettes depuis l'appli — et que la mise à jour soit visible pour tout le monde — il faut un jeton d'accès GitHub personnel, à activer sur chaque appareil que tu utilises pour éditer.</p>
+        <ol class="edit-help">
+          <li>Ouvrir la page de création de jeton GitHub (lien ci-dessous).</li>
+          <li>Sous "Resource owner", choisir <strong>${REPO_OWNER}</strong>, puis sous "Repository access", choisir "Only select repositories" et sélectionner <strong>${REPO_NAME}</strong>.</li>
+          <li>Sous "Permissions" → "Repository permissions", régler <strong>Contents</strong> sur <strong>Read and write</strong>.</li>
+          <li>Générer le jeton, le copier, puis le coller ci-dessous.</li>
+        </ol>
+        <p><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Créer un jeton GitHub →</a></p>
+        <label>Jeton d'accès <input type="password" class="edit-token-input" placeholder="github_pat_…" value="${hasToken ? escapeHtml(EDIT_TOKEN) : ""}"></label>
+        <p class="edit-status" role="status">${hasToken ? "Mode édition actif sur cet appareil." : "Mode édition inactif — lecture seule sur cet appareil."}</p>
+        <div class="edit-actions">
+          <button type="button" class="tool-btn edit-token-save">Activer sur cet appareil</button>
+          ${hasToken ? `<button type="button" class="tool-btn edit-token-clear">Désactiver sur cet appareil</button>` : ""}
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    function close() { overlay.remove(); document.removeEventListener("keydown", onKey); }
+    function onKey(e) { if (e.key === "Escape") close(); }
+    document.addEventListener("keydown", onKey);
+    overlay.querySelector(".cook-close").addEventListener("click", close);
+    overlay.querySelector(".edit-token-save").addEventListener("click", () => {
+      const val = overlay.querySelector(".edit-token-input").value.trim();
+      if (!val) return;
+      EDIT_TOKEN = val;
+      saveEditToken(val);
+      updateEditUI();
+      close();
+    });
+    const tokenClearBtn = overlay.querySelector(".edit-token-clear");
+    if (tokenClearBtn) tokenClearBtn.addEventListener("click", () => {
+      EDIT_TOKEN = "";
+      saveEditToken("");
+      updateEditUI();
+      close();
+    });
   }
 
   function wordMatches(r, word) {
@@ -2573,6 +2894,12 @@
     gridEl.querySelectorAll(".related-link").forEach(btn => {
       btn.addEventListener("click", () => focusRecipe(btn.dataset.goto));
     });
+    gridEl.querySelectorAll(".edit-recipe-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const r = RECIPES.find(x => x.id === btn.dataset.edit);
+        if (r) openRecipeEditor(r);
+      });
+    });
   }
 
   searchInput.addEventListener("input", () => {
@@ -2598,7 +2925,10 @@
   });
 
   document.getElementById("shopping-btn").addEventListener("click", openShoppingList);
+  document.getElementById("add-recipe-btn").addEventListener("click", () => openRecipeEditor());
+  document.getElementById("edit-settings-btn").addEventListener("click", openEditSettings);
 
+  document.getElementById("add-recipe-btn").hidden = !isEditMode();
   buildFamilySelect();
   render();
   openDeepLink();
