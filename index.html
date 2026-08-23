@@ -627,6 +627,13 @@
   .edit-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.2rem; }
   .edit-status { font-size: 0.85rem; color: var(--ink-soft); min-height: 1.2em; }
 
+  .picker-hint { font-size: 0.9rem; color: var(--ink-soft); margin: 0 0 1rem; }
+  .picker-list { margin: 0; padding: 0; list-style: none; }
+  .picker-row { display: flex; align-items: baseline; gap: 0.6rem; padding: 0.5rem 0; cursor: pointer; border-bottom: 1px dotted var(--line); }
+  .picker-row input[type="checkbox"] { flex-shrink: 0; width: 19px; height: 19px; margin-top: 0.1rem; accent-color: var(--accent); }
+  .picker-name { flex: 1 1 auto; font-size: 0.95rem; }
+  .picker-qty { flex-shrink: 0; color: var(--ink-soft); font-variant-numeric: tabular-nums; font-size: 0.9rem; }
+
   .shopping-btn { position: relative; }
   .shopping-count[hidden] { display: none; }
   .shopping-count {
@@ -3101,21 +3108,89 @@
     el.hidden = n === 0;
   }
 
-  function addRecipeToShopping(r, factor = 1) {
+  function addIngredientsToShopping(items, recipeTitle) {
     const existingKeys = new Set(SHOPPING.map(i => i.name + "␟" + i.qty));
     let added = 0;
-    for (const s of r.sections) {
-      (s.ingredients || []).forEach(([name, qty]) => {
-        const scaledQty = scaleQtyString(qty, factor);
-        const key = name + "␟" + scaledQty;
-        if (existingKeys.has(key)) return;
-        existingKeys.add(key);
-        SHOPPING.push({ id: shopItemId(), name, qty: scaledQty, checked: false, recipeTitle: r.title });
-        added++;
-      });
+    for (const { name, qty } of items) {
+      const key = name + "␟" + qty;
+      if (existingKeys.has(key)) continue;
+      existingKeys.add(key);
+      SHOPPING.push({ id: shopItemId(), name, qty, checked: false, recipeTitle });
+      added++;
     }
     saveShopping();
     return added;
+  }
+
+  function openIngredientPicker(r, factor) {
+    const fam = FAMILIES[r.family];
+    let idx = 0;
+    const groups = r.sections
+      .filter(s => s.ingredients && s.ingredients.length)
+      .map(s => ({
+        heading: s.heading,
+        items: s.ingredients.map(([name, qty, caveat]) => ({ i: idx++, name, qty: scaleQtyString(qty, factor), caveat })),
+      }));
+    const flatItems = groups.flatMap(g => g.items);
+    const overlay = document.createElement("div");
+    overlay.className = "cook-overlay";
+    overlay.innerHTML = `
+      <div class="cook-header">
+        <h2>${escapeHtml(r.title)}</h2>
+        <button class="cook-close" type="button" aria-label="Fermer">✕</button>
+      </div>
+      <div class="cook-body picker-form">
+        <p class="picker-hint">Choisis les ingrédients à ajouter à ta liste de courses.</p>
+        <button type="button" class="tool-btn picker-select-all">Tout sélectionner</button>
+        ${groups.map(g => `
+          <div class="section" style="--famcolor:${fam.color}">
+            ${g.heading ? `<h4>${escapeHtml(g.heading)}</h4>` : ""}
+            <ul class="picker-list">
+              ${g.items.map(it => `
+                <li>
+                  <label class="picker-row">
+                    <input type="checkbox" class="picker-check" data-i="${it.i}">
+                    <span class="picker-name">${escapeHtml(it.name)}${it.caveat ? `<span class="caveat">${escapeHtml(it.caveat)}</span>` : ""}</span>
+                    <span class="picker-qty">${escapeHtml(it.qty)}</span>
+                  </label>
+                </li>`).join("")}
+            </ul>
+          </div>`).join("")}
+        <div class="edit-actions">
+          <button type="button" class="tool-btn picker-add-btn">Ajouter à la liste</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    function close() { overlay.remove(); document.removeEventListener("keydown", onKey); }
+    function onKey(e) { if (e.key === "Escape") close(); }
+    document.addEventListener("keydown", onKey);
+    overlay.querySelector(".cook-close").addEventListener("click", close);
+    const checks = () => [...overlay.querySelectorAll(".picker-check")];
+    const addBtn = overlay.querySelector(".picker-add-btn");
+    function refreshAddLabel() {
+      const n = checks().filter(c => c.checked).length;
+      addBtn.textContent = n > 0 ? `Ajouter à la liste (${n})` : "Ajouter à la liste";
+    }
+    checks().forEach(c => c.addEventListener("change", refreshAddLabel));
+    const selectAllBtn = overlay.querySelector(".picker-select-all");
+    selectAllBtn.addEventListener("click", () => {
+      const all = checks();
+      const allChecked = all.every(c => c.checked);
+      all.forEach(c => { c.checked = !allChecked; });
+      selectAllBtn.textContent = allChecked ? "Tout sélectionner" : "Tout désélectionner";
+      refreshAddLabel();
+    });
+    addBtn.addEventListener("click", () => {
+      const selected = checks().filter(c => c.checked).map(c => flatItems[Number(c.dataset.i)]);
+      if (selected.length === 0) { close(); return; }
+      const added = addIngredientsToShopping(selected, r.title);
+      updateShoppingBadge();
+      addBtn.disabled = true;
+      selectAllBtn.disabled = true;
+      checks().forEach(c => { c.disabled = true; });
+      addBtn.textContent = `${added} ingrédient${added > 1 ? "s" : ""} ajouté${added > 1 ? "s" : ""}`;
+      setTimeout(close, 900);
+    });
   }
 
   function shoppingItemHTML(item) {
@@ -3761,13 +3836,7 @@
       btn.addEventListener("click", () => {
         const r = RECIPES.find(x => x.id === btn.dataset.shopAdd);
         if (!r) return;
-        const added = addRecipeToShopping(r, getScaleFactor(r.id));
-        updateShoppingBadge();
-        const original = btn.innerHTML;
-        btn.textContent = added > 0
-          ? `${added} ingrédient${added > 1 ? "s" : ""} ajouté${added > 1 ? "s" : ""}`
-          : "Déjà dans la liste";
-        setTimeout(() => { btn.innerHTML = original; }, 1600);
+        openIngredientPicker(r, getScaleFactor(r.id));
       });
     });
     gridEl.querySelectorAll(".note-input").forEach(ta => {
