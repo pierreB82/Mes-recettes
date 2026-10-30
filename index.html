@@ -582,6 +582,147 @@
   .cook-body ul.notes li { font-size: 1rem; }
   .cook-body .section + .section { margin-top: 1.75rem; }
 
+  .cook-carousel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .cook-carousel .cook-header {
+    position: static;
+  }
+  .cook-ing-toggle {
+    flex-shrink: 0;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 0.5rem 0.8rem;
+    cursor: pointer;
+  }
+  .cook-progress {
+    flex: 1 1 auto;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+  }
+  .cook-ing-drawer {
+    flex-shrink: 0;
+    max-height: 60vh;
+    overflow-y: auto;
+    border-bottom: 1px solid var(--line);
+    padding: 1rem 1.25rem;
+    background: var(--paper-raised);
+  }
+  .cook-ing-drawer[hidden] { display: none; }
+  .cook-ing-drawer .intro { margin-top: 0; }
+  .cook-stage {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    touch-action: pan-y;
+    padding: 1.5rem 1.25rem 2rem;
+  }
+  .cook-card {
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .cook-card-eyebrow {
+    margin: 0 0 0.6rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .cook-card-text {
+    margin: 0;
+    font-size: 1.55rem;
+    line-height: 1.5;
+    font-weight: 700;
+    text-wrap: balance;
+  }
+  .cook-card-notes-group + .cook-card-notes-group { margin-top: 1.5rem; }
+  .cook-card-notes-group h4 { margin: 0 0 0.5rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); }
+  .cook-card-notes-group ul { margin: 0; padding: 0; list-style: none; }
+  .cook-card-notes-group li { font-size: 1.05rem; line-height: 1.5; padding: 0.3rem 0; color: var(--ink-soft); }
+  .cook-timer-widget {
+    margin-top: 2rem;
+    padding: 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--paper-raised);
+    text-align: center;
+  }
+  .cook-timer-display {
+    font-size: 2.6rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 0.8rem;
+  }
+  .cook-timer-widget.running .cook-timer-display { color: var(--accent); }
+  .cook-timer-widget.done .cook-timer-display { color: var(--accent); animation: timerPulse 1s ease-in-out infinite; }
+  .cook-timer-actions { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+  .cook-timer-btn {
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 0.7rem 1.2rem;
+    border-radius: 9px;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: var(--accent-ink);
+    cursor: pointer;
+  }
+  .cook-timer-btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  .cook-nav {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.9rem 1.25rem calc(0.9rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: color-mix(in srgb, var(--paper) 94%, transparent);
+  }
+  .cook-nav-btn {
+    flex: 1 1 auto;
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--paper-raised);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .cook-nav-btn:disabled { opacity: 0.35; cursor: default; }
+  .cook-nav-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .cook-dots {
+    flex-shrink: 0;
+    display: flex;
+    gap: 0.35rem;
+    max-width: 120px;
+    overflow-x: auto;
+  }
+  .cook-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--line);
+    flex-shrink: 0;
+  }
+  .cook-dot.active { background: var(--accent); width: 18px; border-radius: 4px; }
+  @keyframes timerPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
   @media (prefers-reduced-motion: reduce) {
     .panel, .chevron { transition: none; }
   }
@@ -838,6 +979,7 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .timer-item.done { animation: none; }
+    .cook-timer-widget.done .cook-timer-display { animation: none; }
   }
 
   .related-row {
@@ -3305,6 +3447,7 @@
     if (ACTIVE_TIMERS.size === 0) {
       panel.innerHTML = "";
       panel.hidden = true;
+      syncCookTimerWidgets();
       return;
     }
     panel.hidden = false;
@@ -3320,33 +3463,96 @@
     panel.querySelectorAll(".timer-item.done").forEach(el => {
       el.addEventListener("click", () => removeTimer(el.dataset.timerId));
     });
+    syncCookTimerWidgets();
+  }
+
+  function tickTimer(id) {
+    const t = ACTIVE_TIMERS.get(id);
+    if (!t) return;
+    t.remaining -= 1;
+    if (t.remaining <= 0) {
+      t.remaining = 0;
+      t.done = true;
+      clearInterval(t.tickHandle);
+      t.tickHandle = null;
+      playBeep();
+      flashTitle(t.label);
+      t.alarmHandle = setInterval(playBeep, 4000);
+      if ("Notification" in window && Notification.permission === "granted") {
+        try { new Notification("Minuteur terminé", { body: t.label }); } catch {}
+      }
+    }
+    renderTimerPanel();
+  }
+
+  function runTimer(id) {
+    const t = ACTIVE_TIMERS.get(id);
+    if (!t) return;
+    t.paused = false;
+    t.tickHandle = setInterval(() => tickTimer(id), 1000);
   }
 
   function startTimer(seconds, label) {
-    if (!seconds || seconds <= 0) return;
+    if (!seconds || seconds <= 0) return null;
     unlockAudio();
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().catch(() => {});
     }
     const id = "t" + (++TIMER_SEQ);
-    const timer = { seconds, remaining: seconds, label, done: false, tickHandle: null, alarmHandle: null };
-    timer.tickHandle = setInterval(() => {
-      timer.remaining -= 1;
-      if (timer.remaining <= 0) {
-        timer.remaining = 0;
-        timer.done = true;
-        clearInterval(timer.tickHandle);
-        playBeep();
-        flashTitle(label);
-        timer.alarmHandle = setInterval(playBeep, 4000);
-        if ("Notification" in window && Notification.permission === "granted") {
-          try { new Notification("Minuteur terminé", { body: label }); } catch {}
-        }
-      }
-      renderTimerPanel();
-    }, 1000);
+    const timer = { seconds, remaining: seconds, label, done: false, paused: false, tickHandle: null, alarmHandle: null };
     ACTIVE_TIMERS.set(id, timer);
+    runTimer(id);
     renderTimerPanel();
+    return id;
+  }
+
+  function pauseTimer(id) {
+    const t = ACTIVE_TIMERS.get(id);
+    if (!t || t.done || t.paused) return;
+    clearInterval(t.tickHandle);
+    t.tickHandle = null;
+    t.paused = true;
+    renderTimerPanel();
+  }
+
+  function resumeTimer(id) {
+    const t = ACTIVE_TIMERS.get(id);
+    if (!t || t.done || !t.paused) return;
+    runTimer(id);
+    renderTimerPanel();
+  }
+
+  const COOK_TIMER_IDS = new Map();
+
+  function updateCookTimerWidget(el) {
+    const seconds = parseInt(el.dataset.timerSeconds, 10);
+    const key = el.dataset.timerKey;
+    const id = COOK_TIMER_IDS.get(key);
+    const t = id ? ACTIVE_TIMERS.get(id) : null;
+    const displayEl = el.querySelector(".cook-timer-display");
+    const startBtn = el.querySelector('[data-timer-action="start"]');
+    const pauseBtn = el.querySelector('[data-timer-action="pause"]');
+    const resetBtn = el.querySelector('[data-timer-action="reset"]');
+    if (!t) {
+      displayEl.textContent = formatTimerTime(seconds);
+      el.classList.remove("running", "paused", "done");
+      startBtn.hidden = false;
+      pauseBtn.hidden = true;
+      resetBtn.hidden = true;
+      return;
+    }
+    displayEl.textContent = t.done ? "Terminé" : formatTimerTime(t.remaining);
+    el.classList.toggle("done", t.done);
+    el.classList.toggle("paused", t.paused && !t.done);
+    el.classList.toggle("running", !t.paused && !t.done);
+    startBtn.hidden = true;
+    pauseBtn.hidden = t.done;
+    pauseBtn.textContent = t.paused ? "Reprendre" : "Pause";
+    resetBtn.hidden = false;
+  }
+
+  function syncCookTimerWidgets() {
+    document.querySelectorAll(".cook-timer-widget[data-timer-key]").forEach(updateCookTimerWidget);
   }
 
   document.addEventListener("click", (e) => {
@@ -3700,32 +3906,229 @@
     }
   }
 
-  function openCookMode(r, factor = 1) {
+  function buildCookCards(r) {
+    const cards = [];
+    const notesGroups = [];
+    r.sections.forEach((s, sectionIdx) => {
+      if (s.steps && s.steps.length) {
+        s.steps.forEach((text, stepIdx) => {
+          cards.push({ heading: s.heading || "", text, sectionIdx, stepIdx });
+        });
+      }
+      if (s.notes && s.notes.length) {
+        notesGroups.push({ heading: s.heading || "", notes: s.notes });
+      }
+    });
+    return { cards, notesGroups };
+  }
+
+  function cookIngredientsHTML(r, factor) {
     const fam = FAMILIES[r.family];
+    const withIng = r.sections.filter(s => s.ingredients && s.ingredients.length);
+    if (!withIng.length) return `<p class="cook-no-ing">Pas d'ingrédients listés pour cette recette.</p>`;
+    return withIng.map(s => `
+      <div class="section" style="--famcolor:${fam.color}">
+        ${s.heading ? `<h4>${s.heading}</h4>` : ""}
+        <ul class="ing-list">${s.ingredients.map(ing => ingredientRow(ing, factor, false)).join("")}</ul>
+      </div>`).join("");
+  }
+
+  function cookTimerWidgetHTML(recipeId, sectionIdx, stepIdx, duration) {
+    const key = `${recipeId}::${sectionIdx}::${stepIdx}`;
+    return `
+      <div class="cook-timer-widget" data-timer-key="${key}" data-timer-seconds="${duration.seconds}" data-timer-label="${duration.label}">
+        <div class="cook-timer-display">${formatTimerTime(duration.seconds)}</div>
+        <div class="cook-timer-actions">
+          <button type="button" class="cook-timer-btn" data-timer-action="start">Démarrer le minuteur</button>
+          <button type="button" class="cook-timer-btn" data-timer-action="pause" hidden>Pause</button>
+          <button type="button" class="cook-timer-btn cook-timer-btn-ghost" data-timer-action="reset" hidden>Réinitialiser</button>
+        </div>
+      </div>`;
+  }
+
+  function openCookMode(r, factor = 1) {
+    const { cards, notesGroups } = buildCookCards(r);
+    const hasNotes = notesGroups.length > 0;
+    const totalSteps = cards.length;
+    const totalCards = totalSteps + (hasNotes ? 1 : 0);
+    let current = 0;
+    let scaleFactor = factor;
+
     const overlay = document.createElement("div");
-    overlay.className = "cook-overlay";
+    overlay.className = "cook-overlay cook-carousel";
     overlay.innerHTML = `
       <div class="cook-header">
-        <h2 class="display">${r.title}${factor !== 1 ? ` <span class="cook-scale-badge">${formatScaleFactor(factor)}</span>` : ""}</h2>
+        <button class="cook-ing-toggle" type="button">Ingrédients</button>
+        <div class="cook-progress"></div>
         <button class="cook-close" type="button" aria-label="Fermer le mode cuisine">✕</button>
       </div>
-      <div class="cook-body">
+      <div class="cook-ing-drawer" hidden>
+        <h2 class="display" style="margin:0 0 0.5rem;font-size:1.2rem;">${r.title}</h2>
         ${r.intro ? `<p class="intro">${r.intro}</p>` : ""}
-        ${r.sections.map(s => renderSection(s, fam, factor, false)).join("")}
+        <div class="scale-row">
+          <span class="scale-label">Portions</span>
+          <div class="scale-control">
+            <button type="button" class="scale-btn" data-cook-scale="down" aria-label="Réduire les quantités">−</button>
+            <span class="scale-value">${formatScaleFactor(scaleFactor)}</span>
+            <button type="button" class="scale-btn" data-cook-scale="up" aria-label="Augmenter les quantités">+</button>
+          </div>
+        </div>
+        <div class="cook-ing-list"></div>
+      </div>
+      <div class="cook-stage"></div>
+      <div class="cook-nav">
+        <button class="cook-nav-btn" type="button" data-nav="prev">Précédent</button>
+        <div class="cook-dots"></div>
+        <button class="cook-nav-btn primary" type="button" data-nav="next">Suivant</button>
       </div>`;
     document.body.appendChild(overlay);
     document.body.style.overflow = "hidden";
+
+    const stageEl = overlay.querySelector(".cook-stage");
+    const progressEl = overlay.querySelector(".cook-progress");
+    const dotsEl = overlay.querySelector(".cook-dots");
+    const prevBtn = overlay.querySelector('[data-nav="prev"]');
+    const nextBtn = overlay.querySelector('[data-nav="next"]');
+    const ingDrawer = overlay.querySelector(".cook-ing-drawer");
+    const ingListEl = overlay.querySelector(".cook-ing-list");
+    const ingToggleBtn = overlay.querySelector(".cook-ing-toggle");
+
+    function renderIngredients() {
+      ingListEl.innerHTML = cookIngredientsHTML(r, scaleFactor);
+    }
+    renderIngredients();
+
+    function renderDots() {
+      let html = cards.map((_, i) => `<span class="cook-dot${i === current ? " active" : ""}"></span>`).join("");
+      if (hasNotes) html += `<span class="cook-dot${current === totalSteps ? " active" : ""}"></span>`;
+      dotsEl.innerHTML = html;
+    }
+
+    function renderCard() {
+      if (current < totalSteps) {
+        const c = cards[current];
+        const durations = extractDurations(c.text);
+        const widget = durations.length ? cookTimerWidgetHTML(r.id, c.sectionIdx, c.stepIdx, durations[0]) : "";
+        stageEl.innerHTML = `
+          <div class="cook-card">
+            ${c.heading ? `<p class="cook-card-eyebrow">${c.heading}</p>` : ""}
+            <p class="cook-card-text">${c.text}</p>
+            ${widget}
+          </div>`;
+        syncCookTimerWidgets();
+        progressEl.textContent = `Étape ${current + 1} sur ${totalSteps}`;
+      } else {
+        stageEl.innerHTML = `
+          <div class="cook-card">
+            <p class="cook-card-eyebrow">Notes</p>
+            ${notesGroups.map(g => `
+              <div class="cook-card-notes-group">
+                ${g.heading ? `<h4>${g.heading}</h4>` : ""}
+                <ul>${g.notes.map(n => `<li>${n}</li>`).join("")}</ul>
+              </div>`).join("")}
+          </div>`;
+        progressEl.textContent = "Notes";
+      }
+      prevBtn.disabled = current === 0;
+      nextBtn.textContent = current === totalCards - 1 ? "Terminer" : "Suivant";
+      renderDots();
+      stageEl.scrollTop = 0;
+    }
+
+    function goNext() {
+      if (current >= totalCards - 1) { close(); return; }
+      current++;
+      renderCard();
+    }
+    function goPrev() {
+      if (current === 0) return;
+      current--;
+      renderCard();
+    }
+
+    renderCard();
+
+    nextBtn.addEventListener("click", goNext);
+    prevBtn.addEventListener("click", goPrev);
+
+    ingToggleBtn.addEventListener("click", () => {
+      ingDrawer.hidden = !ingDrawer.hidden;
+    });
+
+    overlay.querySelectorAll("[data-cook-scale]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        let idx = SCALES.has(r.id) ? SCALES.get(r.id) : SCALE_STEPS.indexOf(1);
+        idx = btn.dataset.cookScale === "up" ? Math.min(idx + 1, SCALE_STEPS.length - 1) : Math.max(idx - 1, 0);
+        SCALES.set(r.id, idx);
+        scaleFactor = SCALE_STEPS[idx];
+        ingDrawer.querySelector(".scale-value").textContent = formatScaleFactor(scaleFactor);
+        renderIngredients();
+      });
+    });
+
+    overlay.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-timer-action]");
+      if (!btn) return;
+      const widget = btn.closest(".cook-timer-widget");
+      const key = widget.dataset.timerKey;
+      const seconds = parseInt(widget.dataset.timerSeconds, 10);
+      const label = widget.dataset.timerLabel;
+      const action = btn.dataset.timerAction;
+      if (action === "start") {
+        const id = startTimer(seconds, label);
+        if (id) COOK_TIMER_IDS.set(key, id);
+      } else if (action === "pause") {
+        const id = COOK_TIMER_IDS.get(key);
+        const t = id ? ACTIVE_TIMERS.get(id) : null;
+        if (t) { if (t.paused) resumeTimer(id); else pauseTimer(id); }
+      } else if (action === "reset") {
+        const id = COOK_TIMER_IDS.get(key);
+        if (id) removeTimer(id);
+        COOK_TIMER_IDS.delete(key);
+      }
+      updateCookTimerWidget(widget);
+    });
+
+    let pointerStartX = null, pointerStartY = null, pointerActive = false;
+    stageEl.addEventListener("pointerdown", (e) => {
+      pointerStartX = e.clientX;
+      pointerStartY = e.clientY;
+      pointerActive = true;
+    });
+    stageEl.addEventListener("pointerup", (e) => {
+      if (!pointerActive) return;
+      pointerActive = false;
+      const dx = e.clientX - pointerStartX;
+      const dy = e.clientY - pointerStartY;
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        if (dx < 0) goNext(); else goPrev();
+      }
+    });
+    stageEl.addEventListener("pointercancel", () => { pointerActive = false; });
+
     let wakeLock = null;
-    if ("wakeLock" in navigator) {
+    function acquireWakeLock() {
+      if (!("wakeLock" in navigator)) return;
       navigator.wakeLock.request("screen").then(wl => { wakeLock = wl; }).catch(() => {});
     }
+    function onVisibilityChange() {
+      if (document.visibilityState === "visible" && overlay.isConnected) acquireWakeLock();
+    }
+    acquireWakeLock();
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     function close() {
       if (wakeLock) wakeLock.release().catch(() => {});
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       document.body.style.overflow = "";
       overlay.remove();
       document.removeEventListener("keydown", onKey);
     }
-    function onKey(e) { if (e.key === "Escape") close(); }
+    function onKey(e) {
+      if (e.key === "Escape") close();
+      else if (e.key === "ArrowRight") goNext();
+      else if (e.key === "ArrowLeft") goPrev();
+    }
     document.addEventListener("keydown", onKey);
     overlay.querySelector(".cook-close").addEventListener("click", close);
   }
