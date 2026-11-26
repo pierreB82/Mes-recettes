@@ -154,6 +154,25 @@
     letter-spacing: -0.01em;
     text-wrap: balance;
   }
+  .install-help-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-left: 0.3rem;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--paper-raised);
+    color: var(--ink-soft);
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .install-help-btn:hover { color: var(--accent); border-color: var(--accent); }
 
   .search-row {
     display: flex;
@@ -1032,7 +1051,7 @@
 <div class="wrap">
   <header class="top">
     <div class="top-inner">
-      <h1 class="title display">Marmotton</h1>
+      <h1 class="title display">Marmotton <button id="install-help-btn" class="install-help-btn" type="button" aria-label="Comment installer l'application sur mon téléphone">?</button></h1>
       <div class="search-row">
         <div class="search-box">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -4450,6 +4469,43 @@
     render();
   }
 
+  function openInstallHelp() {
+    const overlay = document.createElement("div");
+    overlay.className = "cook-overlay";
+    overlay.innerHTML = `
+      <div class="cook-header">
+        <h2>Installer Marmotton sur son téléphone</h2>
+        <button class="cook-close" type="button" aria-label="Fermer">✕</button>
+      </div>
+      <div class="cook-body edit-form">
+        <p>Une fois installé, Marmotton s'ouvre en plein écran avec sa propre icône, comme une vraie application, sans rien à télécharger depuis un store.</p>
+        <div class="section" style="--famcolor:var(--accent)">
+          <h4>iPhone et iPad</h4>
+          <ol class="edit-help">
+            <li>Ouvrir ce site dans <strong>Safari</strong> (pas un autre navigateur).</li>
+            <li>Toucher le bouton <strong>Partager</strong> (le carré avec la flèche vers le haut).</li>
+            <li>Faire défiler la liste et choisir <strong>« Sur l'écran d'accueil »</strong>.</li>
+            <li>Toucher <strong>« Ajouter »</strong> en haut à droite.</li>
+          </ol>
+        </div>
+        <div class="section" style="--famcolor:var(--accent)">
+          <h4>Android</h4>
+          <ol class="edit-help">
+            <li>Ouvrir ce site dans <strong>Chrome</strong>.</li>
+            <li>Toucher le menu (les trois points) en haut à droite.</li>
+            <li>Choisir <strong>« Ajouter à l'écran d'accueil »</strong> (parfois sous « Installer l'application »).</li>
+            <li>Confirmer en touchant <strong>« Ajouter »</strong>.</li>
+          </ol>
+        </div>
+        <p class="edit-status">Une icône « Marmotton » apparaît alors sur l'écran d'accueil. Les recettes se mettent à jour automatiquement, rien à réinstaller.</p>
+      </div>`;
+    document.body.appendChild(overlay);
+    function close() { overlay.remove(); document.removeEventListener("keydown", onKey); }
+    function onKey(e) { if (e.key === "Escape") close(); }
+    document.addEventListener("keydown", onKey);
+    overlay.querySelector(".cook-close").addEventListener("click", close);
+  }
+
   function openEditSettings() {
     const overlay = document.createElement("div");
     overlay.className = "cook-overlay";
@@ -4648,6 +4704,7 @@
 
   document.getElementById("shopping-btn").addEventListener("click", openShoppingList);
   document.getElementById("edit-settings-btn").addEventListener("click", openEditSettings);
+  document.getElementById("install-help-btn").addEventListener("click", openInstallHelp);
 
   buildFamilySelect();
   render();
